@@ -8,7 +8,7 @@ Can supervised fine-tuning, with optional preference or reward optimization, mak
 
 ## Planned phases
 
-- **A — Agent harness:** connect the selected model to a constrained terminal/tool interface. **A1 (tool layer) is implemented; A2 (agent loop/model integration) has not started.**
+- **A — Agent harness:** connect the selected model to a constrained terminal/tool interface. **A1 (tool layer) and A2 (native tool-call parsing, client interface, local Transformers adapter, and minimal loop) are implemented.**
 - **B — Executable benchmark:** define reproducible coding tasks, isolated workspaces, and objective success checks.
 - **C — Baseline evaluation:** evaluate the unmodified model and record reproducible metrics before training.
 - **D — QLoRA SFT:** train on curated terminal/tool-use demonstrations using cloud GPU resources.
@@ -16,7 +16,7 @@ Can supervised fine-tuning, with optional preference or reward optimization, mak
 - **F — Optional GRPO:** test reward-based optimization if the benchmark reward is stable and cloud compute is available.
 - **G — GGUF and local deployment:** quantize the selected checkpoint and run it with llama.cpp locally; compare it against the baseline.
 
-The intended order is **Qwen3-1.7B → tool-calling agent → executable benchmark → baseline evaluation → QLoRA SFT → optional DPO → optional GRPO → GGUF → local llama.cpp deployment**. Phase A1 is the first implemented subphase; no model inference, benchmark work, or training has started.
+The intended order is **Qwen3-1.7B → tool-calling agent → executable benchmark → baseline evaluation → QLoRA SFT → optional DPO → optional GRPO → GGUF → local llama.cpp deployment**. Phase A1 and A2 interfaces are implemented. Actual model inference, benchmark work, and training have not run.
 
 ## Phase A1 architecture
 
@@ -40,7 +40,21 @@ Subprocesses receive an allowlisted environment; `HOME`, temporary paths, XDG pa
 
 The tool layer is a workspace-scoped guardrail, not an operating-system sandbox: shell commands execute arbitrary programs, and a deliberately supplied absolute path can still be accessed by those programs. The agent loop must preserve the workspace boundary and treat command execution as a privileged capability.
 
-The implementation uses only the Python standard library. Its unit tests run with `python3 -m unittest discover -v`.
+## Phase A2 model and tool-call protocol
+
+The inference boundary is `ModelClient.generate(messages, tools) -> str`: it returns raw assistant text and does not parse calls or execute tools. `LocalTransformersClient` is the initial local implementation. It supplies the OpenAI-style tool schemas to Qwen3's own tokenizer chat template, then returns decoded output without rewriting the model's native protocol. Model loading is lazy and `local_files_only=True` by default, so inference does not silently download weights.
+
+The protocol remains Qwen3's native format:
+
+```text
+<tool_call>{"name":"write_file","arguments":{"path":"notes.txt","content":"hello"}}</tool_call>
+```
+
+Tool definitions live separately in `tools/definitions.py`. `agent/parser.py` parses each native block and validates JSON, tool name, required fields, types, ranges, and unexpected fields. It validates every call in an assistant response before the executor can run any of them. `agent/loop.py` handles sequential model/tool turns; `tools/executor.py` dispatches validated calls to the existing workspace-bound `Toolbox`. Plain assistant text with no tool-call block is treated as the final response. No remote client or alternate call syntax is implemented.
+
+The local inference adapter is implemented but not runnable in the inspected environment yet: PyTorch, Transformers, and local Qwen3 model files are absent. Install/use those only when preparing to run real inference. Tests use a fake `ModelClient` and do not fabricate model outputs as evaluation results.
+
+The implementation uses the Python standard library for parsing, schemas, orchestration, and tests. Its suite runs with `python3 -m unittest discover -v`; actual `LocalTransformersClient` generation requires the optional `torch` and `transformers` packages.
 
 ## Hardware constraints
 
@@ -61,7 +75,7 @@ The current environment has about 7.7 GiB RAM and 283 GiB free on the workspace 
 - PyTorch, Transformers, Datasets, TRL, PEFT, bitsandbytes, Unsloth, Hugging Face Hub client, and llama.cpp.
 - PyTorch and a verified PyTorch CUDA runtime; CUDA toolkit/compiler availability also remains unverified.
 - A local Qwen3-1.7B model cache, verified model download, and verified inference path.
-- A2 agent loop, model interface/inference, benchmark tasks, baseline results, training data, trained checkpoints, and deployment artifacts.
+- A runnable local inference environment and cached Qwen3-1.7B checkpoint, benchmark tasks, baseline results, training data, trained checkpoints, and deployment artifacts.
 - Any verified cloud GPU access, account, credentials, or allocation.
 
-No model dependencies were installed, and no benchmark or model result has been generated. Phase A1 unit tests use only the Python standard library.
+No model dependencies were installed, and no benchmark or model result has been generated. Parser and agent-loop unit tests use scripted fake responses, not model results.
