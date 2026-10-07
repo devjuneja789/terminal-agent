@@ -23,10 +23,13 @@ class ToolExecutor:
             "git": toolbox.git,
         }
 
-    def execute(self, call: ToolCall) -> ToolResult:
+    def execute(self, call: ToolCall, *, timeout_budget: float | None = None) -> ToolResult:
         """Revalidate at the execution boundary before invoking any tool."""
         try:
-            arguments = validate_tool_arguments(call.name, call.arguments)
+            arguments = dict(validate_tool_arguments(call.name, call.arguments))
         except ValueError as exc:
             raise ToolCallValidationError(str(exc)) from exc
+        if timeout_budget is not None and call.name in {"shell", "git"}:
+            requested_timeout = arguments.get("timeout", 30.0)
+            arguments["timeout"] = min(requested_timeout, timeout_budget)
         return self._dispatch[call.name](**arguments)

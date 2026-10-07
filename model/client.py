@@ -24,6 +24,11 @@ class ModelClient(ABC):
         self,
         messages: Sequence[ChatMessage],
         tools: Sequence[dict[str, Any]],
+        *,
+        timeout: float | None = None,
     ) -> str:
-        """Run inference and return decoded assistant text unchanged."""
+        """Run inference and return raw assistant text unchanged.
 
+        Implementations should respect ``timeout`` and raise ``TimeoutError``
+        when the remaining wall-clock budget is exhausted.
+        """

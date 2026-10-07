@@ -8,7 +8,7 @@ Can supervised fine-tuning, with optional preference or reward optimization, mak
 
 ## Planned phases
 
-- **A — Agent harness:** connect the selected model to a constrained terminal/tool interface. **A1 (tool layer) and A2 (native tool-call parsing, client interface, local Transformers adapter, and minimal loop) are implemented.**
+- **A — Agent harness:** connect the selected model to a constrained terminal/tool interface. **A1 (tool layer), A2 (model interface/native tool-call parsing), and A3 (bounded loop/state/trajectory) are implemented.**
 - **B — Executable benchmark:** define reproducible coding tasks, isolated workspaces, and objective success checks.
 - **C — Baseline evaluation:** evaluate the unmodified model and record reproducible metrics before training.
 - **D — QLoRA SFT:** train on curated terminal/tool-use demonstrations using cloud GPU resources.
@@ -16,7 +16,7 @@ Can supervised fine-tuning, with optional preference or reward optimization, mak
 - **F — Optional GRPO:** test reward-based optimization if the benchmark reward is stable and cloud compute is available.
 - **G — GGUF and local deployment:** quantize the selected checkpoint and run it with llama.cpp locally; compare it against the baseline.
 
-The intended order is **Qwen3-1.7B → tool-calling agent → executable benchmark → baseline evaluation → QLoRA SFT → optional DPO → optional GRPO → GGUF → local llama.cpp deployment**. Phase A1 and A2 interfaces are implemented. Actual model inference, benchmark work, and training have not run.
+The intended order is **Qwen3-1.7B → tool-calling agent → executable benchmark → baseline evaluation → QLoRA SFT → optional DPO → optional GRPO → GGUF → local llama.cpp deployment**. Phases A1–A3 are implemented. Actual model inference, benchmark work, and training have not run.
 
 ## Phase A1 architecture
 
@@ -42,7 +42,7 @@ The tool layer is a workspace-scoped guardrail, not an operating-system sandbox:
 
 ## Phase A2 model and tool-call protocol
 
-The inference boundary is `ModelClient.generate(messages, tools) -> str`: it returns raw assistant text and does not parse calls or execute tools. `LocalTransformersClient` is the initial local implementation. It supplies the OpenAI-style tool schemas to Qwen3's own tokenizer chat template, then returns decoded output without rewriting the model's native protocol. Model loading is lazy and `local_files_only=True` by default, so inference does not silently download weights.
+The inference boundary is `ModelClient.generate(messages, tools, timeout=None) -> str`: it returns raw assistant text and does not parse calls or execute tools. `LocalTransformersClient` is the initial local implementation. It supplies the OpenAI-style tool schemas to Qwen3's own tokenizer chat template, then returns decoded output without rewriting the model's native protocol. Model loading is lazy and `local_files_only=True` by default, so inference does not silently download weights.
 
 The protocol remains Qwen3's native format:
 
@@ -56,6 +56,12 @@ The local inference adapter is implemented but not runnable in the inspected env
 
 The implementation uses the Python standard library for parsing, schemas, orchestration, and tests. Its suite runs with `python3 -m unittest discover -v`; actual `LocalTransformersClient` generation requires the optional `torch` and `transformers` packages.
 
+## Phase A3 bounded agent loop
+
+`AgentLoop` receives a user request, passes the five schemas to `ModelClient`, validates each response before execution, appends each tool observation as a `tool` message, and repeats until normal assistant text or a stop condition. `AgentConfig` sets maximum tool calls, wall-clock execution time, conversation characters, and serialized tool-output characters. Calls beyond the tool limit are recorded as skipped; oversized observations are clipped and marked. The loop records timestamped model/tool events, request, arguments, results, final response, and stop reason in `AgentTrajectory.to_dict()`.
+
+The deadline is cooperative across Python operations: it is passed to the model client and to shell/Git timeout handling, and the loop will not start another action after the deadline. A model backend must honor its timeout contract; synchronous file/grep operations cannot be forcibly interrupted mid-call. The loop does not add planning or long-term memory.
+
 ## Hardware constraints
 
 The local NVIDIA GTX 1060 Max-Q with 6 GB VRAM has been confirmed from a plain WSL terminal. The recorded host check showed driver 582.78 and CUDA driver support through 13.0; the sandboxed inspection used for this project did not expose the GPU, and `nvcc`/CUDA toolkit availability remains unverified. Local use is intended for development, evaluation, and quantized inference. Training is expected to use cloud GPUs; no cloud account, GPU, or credentials have been checked or assumed.
@@ -67,6 +73,7 @@ The current environment has about 7.7 GiB RAM and 283 GiB free on the workspace 
 - WSL2 on Ubuntu 24.04.1 LTS, x86_64, with Python 3.12.3 and pip 24.0.
 - A Git repository on `main` tracking `origin/main`, with global identity and GitHub credential-helper configuration.
 - The Phase A1 `Toolbox` implementation and its standard-library unit tests.
+- The A2 native tool-call client/parser and A3 bounded loop with scripted mock-client tests.
 - The existing `implementation_plan_claude.md` planning note.
 - Public Hugging Face listing for [`Qwen/Qwen3-1.7B`](https://huggingface.co/Qwen/Qwen3-1.7B). This confirms the repository is listed publicly, but model weights have not been downloaded and download access from this machine has not been tested.
 
@@ -78,4 +85,4 @@ The current environment has about 7.7 GiB RAM and 283 GiB free on the workspace 
 - A runnable local inference environment and cached Qwen3-1.7B checkpoint, benchmark tasks, baseline results, training data, trained checkpoints, and deployment artifacts.
 - Any verified cloud GPU access, account, credentials, or allocation.
 
-No model dependencies were installed, and no benchmark or model result has been generated. Parser and agent-loop unit tests use scripted fake responses, not model results.
+No model dependencies were installed, and no benchmark or model result has been generated. Parser and agent-loop unit tests use scripted mock responses, not model results.

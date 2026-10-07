@@ -1,6 +1,6 @@
 # Research decisions
 
-This file records project decisions and their rationale. Phases A1 and A2 establish the tool boundary and native model/tool-call interface; benchmark and training decisions remain open.
+This file records project decisions and their rationale. Phases A1–A3 establish the tool boundary, native model/tool-call interface, and bounded execution loop; benchmark and training decisions remain open.
 
 ## Initial direction
 
@@ -9,7 +9,7 @@ This file records project decisions and their rationale. Phases A1 and A2 establ
 - **Evaluation:** compare the unmodified model and adapted checkpoints using an executable benchmark with objective success checks.
 - **Training:** QLoRA SFT is the planned first training method; DPO and GRPO remain optional and depend on evidence, data, and compute.
 - **Compute split:** local machine for development, evaluation, and quantized inference; cloud GPU for training.
-- **Current status:** A1 and A2 interfaces are implemented and covered by unit tests. Real model inference, benchmark, and training have not been run.
+- **Current status:** A1–A3 are implemented and covered by unit tests. Real model inference, benchmark, and training have not been run.
 
 ## Phase A1 design decisions
 
@@ -32,6 +32,15 @@ This file records project decisions and their rationale. Phases A1 and A2 establ
 - **Start with local Transformers, without implicit downloads:** `LocalTransformersClient` uses the Qwen3 tokenizer's own chat template with the tool schemas and returns raw decoded text. Imports/model loading are lazy, and `local_files_only=True` is the default. A local model runtime and checkpoint are not present in the inspected environment, so real inference remains unverified.
 - **No remote client yet:** a remote OpenAI-compatible adapter is unnecessary to test the interface; tests use a fake in-process `ModelClient`.
 - **No training or benchmark work in A2:** tests verify parsing/orchestration behavior only and are not model evaluation results.
+
+## Phase A3 loop and state decisions
+
+- **Keep the loop deterministic:** one model response is parsed, all calls in that response are validated, and calls execute in emitted order. Results are appended as tool messages before the next inference.
+- **Bound run resources:** `AgentConfig` caps tool calls, elapsed time, total conversation characters, and each serialized tool observation. The model and shell/Git tools receive the remaining time budget where supported; after a deadline, the loop starts no further action.
+- **Return explicit stop states:** completion, tool-call limit, execution timeout, conversation limit, malformed tool call, and model failure are represented distinctly. Tool failures become observations so the model can recover; parser validation failures stop before execution.
+- **Record a timestamped trajectory:** the trace stores the user request, each raw model response, each tool name and arguments, bounded tool results, timestamps, final response, and stop reason. Truncation is marked in the event/result.
+- **No planning or persistent memory:** conversation state is limited to the current task and is discarded with the run result unless a caller stores its trajectory.
+- **Timeout limitation:** Python operations such as file reads and grep cannot be forcibly interrupted safely. The loop checks the deadline between operations; subprocess tools and model clients are expected to honor the remaining-time contract.
 
 ## Decisions to resolve before later phases
 

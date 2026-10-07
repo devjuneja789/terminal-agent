@@ -94,7 +94,11 @@ class LocalTransformersClient(ModelClient):
         self,
         messages: Sequence[ChatMessage],
         tools: Sequence[dict[str, Any]],
+        *,
+        timeout: float | None = None,
     ) -> str:
+        if timeout is not None and timeout <= 0:
+            raise TimeoutError("no inference time remains")
         self._load()
         assert self._torch is not None
         assert self._tokenizer is not None
@@ -112,11 +116,14 @@ class LocalTransformersClient(ModelClient):
         rendered = rendered.to(self._resolved_device)
         input_length = rendered.shape[-1]
         with self._torch.inference_mode():
-            generated = self._model.generate(
-                rendered,
-                max_new_tokens=self.max_new_tokens,
-                do_sample=False,
-                use_cache=True,
-            )
+            generation_options: dict[str, Any] = {
+                "max_new_tokens": self.max_new_tokens,
+                "do_sample": False,
+                "use_cache": True,
+            }
+            if timeout is not None:
+                # Transformers checks max_time between decoding steps.
+                generation_options["max_time"] = timeout
+            generated = self._model.generate(rendered, **generation_options)
         new_tokens = generated[0, input_length:]
         return self._tokenizer.decode(new_tokens, skip_special_tokens=False)

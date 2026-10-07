@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import json
 import tempfile
+import time
 import unittest
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Sequence
 
 from agent.loop import AgentLoop
 from agent.parser import ToolCallValidationError, parse_assistant_response
+from agent.state import AgentConfig, StopReason
 from model.client import ChatMessage, ModelClient
 from model.local import LocalTransformersClient
 from tools import Toolbox
@@ -18,19 +22,29 @@ def native_call(name: str, arguments: str) -> str:
     return f'<tool_call>{{"name":"{name}","arguments":{arguments}}}</tool_call>'
 
 
-class FakeModelClient(ModelClient):
-    def __init__(self, responses: Sequence[str]) -> None:
+class MockModelClient(ModelClient):
+    """Deterministic scripted client; no model packages or weights are needed."""
+
+    def __init__(self, responses: Sequence[str], *, delay_seconds: float = 0.0) -> None:
         self.responses = list(responses)
-        self.calls: list[tuple[list[ChatMessage], list[dict[str, Any]]]] = []
+        self.delay_seconds = delay_seconds
+        self.calls: list[tuple[list[ChatMessage], list[dict[str, Any]], float | None]] = []
 
     def generate(
         self,
         messages: Sequence[ChatMessage],
         tools: Sequence[dict[str, Any]],
+        *,
+        timeout: float | None = None,
     ) -> str:
-        self.calls.append((list(messages), list(tools)))
+        self.calls.append((list(messages), list(tools), timeout))
+        if self.delay_seconds:
+            if timeout is not None and self.delay_seconds > timeout:
+                time.sleep(timeout)
+                raise TimeoutError("mock inference timed out")
+            time.sleep(self.delay_seconds)
         if not self.responses:
-            raise AssertionError("fake model received more generation calls than expected")
+            raise AssertionError("mock model received more generation calls than expected")
         return self.responses.pop(0)
 
 
@@ -101,23 +115,60 @@ class AgentLoopTests(unittest.TestCase):
         self.workspace = Path(self.temporary.name) / "workspace"
         self.workspace.mkdir()
         self.toolbox = Toolbox(self.workspace)
+        self.executor = ToolExecutor(self.toolbox)
 
     def tearDown(self) -> None:
         self.toolbox.close()
         self.temporary.cleanup()
 
-    def test_multiple_sequential_tool_calls_then_final_response(self) -> None:
-        model = FakeModelClient(
+    def test_simple_final_answer(self) -> None:
+        model = MockModelClient(["No tool is needed."])
+        result = AgentLoop(model, self.executor).run("Say whether a tool is needed.")
+        self.assertTrue(result.completed)
+        self.assertEqual(result.final_text, "No tool is needed.")
+        self.assertEqual(result.tool_calls, ())
+        self.assertEqual(result.turns, 1)
+
+    def test_one_tool_call_then_final_answer_records_complete_trajectory(self) -> None:
+        model = MockModelClient(
+            [
+                native_call("write_file", '{"path":"answer.txt","content":"42\\n"}'),
+                "I wrote the answer file.",
+            ]
+        )
+        result = AgentLoop(model, self.executor).run("Write 42 to answer.txt.")
+        self.assertTrue(result.completed)
+        self.assertEqual((self.workspace / "answer.txt").read_text(), "42\n")
+        trajectory = result.trajectory
+        self.assertEqual(trajectory.user_request, "Write 42 to answer.txt.")
+        self.assertEqual(trajectory.final_response, "I wrote the answer file.")
+        self.assertIsNotNone(trajectory.finished_at)
+        datetime.fromisoformat(trajectory.started_at)
+        datetime.fromisoformat(trajectory.finished_at)
+        self.assertEqual([event.kind for event in trajectory.events], ["model", "tool", "model"])
+        model_event, tool_event, final_event = trajectory.events
+        self.assertIn("<tool_call>", model_event.model_output or "")
+        self.assertIsNotNone(model_event.started_at)
+        self.assertIsNotNone(model_event.finished_at)
+        datetime.fromisoformat(model_event.started_at)
+        datetime.fromisoformat(model_event.finished_at)
+        self.assertEqual(tool_event.tool_name, "write_file")
+        self.assertEqual(tool_event.tool_arguments, {"path": "answer.txt", "content": "42\n"})
+        self.assertTrue(tool_event.executed)
+        self.assertTrue(tool_event.tool_result["success"])
+        self.assertEqual(final_event.model_output, "I wrote the answer file.")
+        self.assertEqual(trajectory.stop_reason, StopReason.COMPLETED)
+        json.dumps(trajectory.to_dict())
+
+    def test_multiple_tool_calls_are_sequential_and_observed(self) -> None:
+        model = MockModelClient(
             [
                 native_call("write_file", '{"path":"src/message.txt","content":"ready\\n"}'),
                 native_call("read_file", '{"path":"src/message.txt"}'),
                 "The file contains: ready",
             ]
         )
-        loop = AgentLoop(model, ToolExecutor(self.toolbox))
-
-        result = loop.run("Create and check a message file.")
-
+        result = AgentLoop(model, self.executor).run("Create and check a message file.")
         self.assertEqual(result.final_text, "The file contains: ready")
         self.assertEqual([call.name for call in result.tool_calls], ["write_file", "read_file"])
         self.assertEqual(result.turns, 3)
@@ -125,36 +176,89 @@ class AgentLoopTests(unittest.TestCase):
         self.assertEqual([message["role"] for message in result.messages[-5:]], [
             "assistant", "tool", "assistant", "tool", "assistant"
         ])
-        self.assertEqual(model.calls[0][1], get_tool_schemas())
         self.assertIn("ready", model.calls[2][0][-1]["content"])
+        self.assertTrue(all(model_call[1] == get_tool_schemas() for model_call in model.calls))
 
     def test_ordered_multiple_calls_in_one_response_execute_sequentially(self) -> None:
         combined = (
             native_call("write_file", '{"path":"step.txt","content":"one"}')
             + native_call("read_file", '{"path":"step.txt"}')
         )
-        model = FakeModelClient([combined, "Done."])
-        result = AgentLoop(model, ToolExecutor(self.toolbox)).run("Write then read.")
+        model = MockModelClient([combined, "Done."])
+        result = AgentLoop(model, self.executor).run("Write then read.")
         self.assertEqual([call.name for call in result.tool_calls], ["write_file", "read_file"])
         self.assertEqual(result.turns, 2)
 
-    def test_invalid_later_call_prevents_all_execution_for_that_response(self) -> None:
+    def test_malformed_tool_call_stops_without_execution(self) -> None:
+        model = MockModelClient([native_call("write_file", '{"path":"bad.txt","content":}')])
+        result = AgentLoop(model, self.executor).run("Try a malformed call.")
+        self.assertEqual(result.stop_reason, StopReason.INVALID_TOOL_CALL)
+        self.assertFalse((self.workspace / "bad.txt").exists())
+        self.assertIn("malformed tool-call JSON", result.trajectory.events[0].error or "")
+
+    def test_invalid_later_call_prevents_prior_call_execution(self) -> None:
         response = (
             native_call("write_file", '{"path":"must-not-exist.txt","content":"no"}')
             + native_call("shell", '{"command":123}')
         )
-        model = FakeModelClient([response])
-        loop = AgentLoop(model, ToolExecutor(self.toolbox))
-        with self.assertRaises(ToolCallValidationError):
-            loop.run("Try the calls.")
+        model = MockModelClient([response])
+        result = AgentLoop(model, self.executor).run("Try the calls.")
+        self.assertEqual(result.stop_reason, StopReason.INVALID_TOOL_CALL)
         self.assertFalse((self.workspace / "must-not-exist.txt").exists())
 
-    def test_normal_final_response_ends_without_tool_execution(self) -> None:
-        model = FakeModelClient(["No tool is needed."])
-        result = AgentLoop(model, ToolExecutor(self.toolbox)).run("Say whether a tool is needed.")
-        self.assertEqual(result.final_text, "No tool is needed.")
-        self.assertEqual(result.tool_calls, ())
-        self.assertEqual(result.turns, 1)
+    def test_tool_failure_is_returned_as_observation_and_loop_continues(self) -> None:
+        model = MockModelClient([native_call("read_file", '{"path":"missing.txt"}'), "I could not read it."])
+        result = AgentLoop(model, self.executor).run("Read missing.txt.")
+        self.assertTrue(result.completed)
+        tool_event = next(event for event in result.trajectory.events if event.kind == "tool")
+        self.assertFalse(tool_event.tool_result["success"])
+        self.assertIn("not a file", tool_event.tool_result["error"])
+        self.assertEqual(result.final_text, "I could not read it.")
+
+    def test_maximum_tool_calls_terminates_before_extra_execution(self) -> None:
+        model = MockModelClient(
+            [
+                native_call("write_file", '{"path":"first.txt","content":"1"}'),
+                native_call("write_file", '{"path":"second.txt","content":"2"}'),
+            ]
+        )
+        config = AgentConfig(max_tool_calls=1)
+        result = AgentLoop(model, self.executor, config=config).run("Write two files.")
+        self.assertEqual(result.stop_reason, StopReason.MAX_TOOL_CALLS)
+        self.assertEqual(len(result.tool_calls), 1)
+        self.assertTrue((self.workspace / "first.txt").exists())
+        self.assertFalse((self.workspace / "second.txt").exists())
+        skipped = result.trajectory.events[-1]
+        self.assertFalse(skipped.executed)
+        self.assertIn("limit reached", skipped.error or "")
+
+    def test_execution_timeout_passes_remaining_budget_and_stops(self) -> None:
+        model = MockModelClient(["This should not be accepted as a late final."], delay_seconds=0.05)
+        config = AgentConfig(max_execution_time_seconds=0.005)
+        result = AgentLoop(model, self.executor, config=config).run("Wait for a slow model.")
+        self.assertEqual(result.stop_reason, StopReason.EXECUTION_TIMEOUT)
+        self.assertIsNone(result.final_text)
+        self.assertEqual(len(model.calls), 1)
+        self.assertLessEqual(model.calls[0][2], config.max_execution_time_seconds)
+
+    def test_tool_output_and_conversation_sizes_are_bounded(self) -> None:
+        model = MockModelClient(
+            [native_call("shell", '{"command":"printf \'%01000d\' 1"}'), "Output was capped."]
+        )
+        config = AgentConfig(max_tool_output_chars=256, max_conversation_chars=4096)
+        result = AgentLoop(model, self.executor, config=config).run("Print a lot of output.")
+        tool_message = next(message for message in result.messages if message["role"] == "tool")
+        self.assertLessEqual(len(tool_message["content"]), config.max_tool_output_chars)
+        tool_event = next(event for event in result.trajectory.events if event.kind == "tool")
+        self.assertTrue(tool_event.tool_result_truncated)
+        self.assertTrue(result.completed)
+
+    def test_oversized_initial_conversation_stops_before_inference(self) -> None:
+        model = MockModelClient(["unused"])
+        config = AgentConfig(max_conversation_chars=256)
+        result = AgentLoop(model, self.executor, config=config).run("task", system_prompt="s" * 300)
+        self.assertEqual(result.stop_reason, StopReason.CONVERSATION_LIMIT)
+        self.assertEqual(model.calls, [])
 
 
 if __name__ == "__main__":
