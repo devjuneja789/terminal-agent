@@ -8,7 +8,7 @@ Can supervised fine-tuning, with optional preference or reward optimization, mak
 
 ## Planned phases
 
-- **A — Agent harness:** connect the selected model to a constrained terminal/tool interface. **A1 (tool layer), A2 (model interface/native tool-call parsing), and A3 (bounded loop/state/trajectory) are implemented.**
+- **A — Agent harness:** connect the selected model to a constrained terminal/tool interface. **A1 (tool layer), A2 (model interface/native tool-call parsing), A3 (bounded loop/state/trajectory), and A4 (CLI) are implemented.**
 - **B — Executable benchmark:** define reproducible coding tasks, isolated workspaces, and objective success checks.
 - **C — Baseline evaluation:** evaluate the unmodified model and record reproducible metrics before training.
 - **D — QLoRA SFT:** train on curated terminal/tool-use demonstrations using cloud GPU resources.
@@ -16,7 +16,7 @@ Can supervised fine-tuning, with optional preference or reward optimization, mak
 - **F — Optional GRPO:** test reward-based optimization if the benchmark reward is stable and cloud compute is available.
 - **G — GGUF and local deployment:** quantize the selected checkpoint and run it with llama.cpp locally; compare it against the baseline.
 
-The intended order is **Qwen3-1.7B → tool-calling agent → executable benchmark → baseline evaluation → QLoRA SFT → optional DPO → optional GRPO → GGUF → local llama.cpp deployment**. Phases A1–A3 are implemented. Actual model inference, benchmark work, and training have not run.
+The intended order is **Qwen3-1.7B → tool-calling agent → executable benchmark → baseline evaluation → QLoRA SFT → optional DPO → optional GRPO → GGUF → local llama.cpp deployment**. Phases A1–A4 are implemented. Actual model inference, benchmark work, and training have not run.
 
 ## Phase A1 architecture
 
@@ -50,17 +50,47 @@ The protocol remains Qwen3's native format:
 <tool_call>{"name":"write_file","arguments":{"path":"notes.txt","content":"hello"}}</tool_call>
 ```
 
-Tool definitions live separately in `tools/definitions.py`. `agent/parser.py` parses each native block and validates JSON, tool name, required fields, types, ranges, and unexpected fields. It validates every call in an assistant response before the executor can run any of them. `agent/loop.py` handles sequential model/tool turns; `tools/executor.py` dispatches validated calls to the existing workspace-bound `Toolbox`. Plain assistant text with no tool-call block is treated as the final response. No remote client or alternate call syntax is implemented.
+Tool definitions live separately in `tools/definitions.py`. `agent/parser.py` parses each native block and validates JSON, tool name, required fields, types, ranges, and unexpected fields. It validates every call in an assistant response before the executor can run any of them. `agent/loop.py` handles sequential model/tool turns; `tools/executor.py` dispatches validated calls to the existing workspace-bound `Toolbox`. Plain assistant text with no tool-call block is treated as the final response. There is no remote-host client or alternate call syntax.
 
-The local inference adapter is implemented but not runnable in the inspected environment yet: PyTorch, Transformers, and local Qwen3 model files are absent. Install/use those only when preparing to run real inference. Tests use a fake `ModelClient` and do not fabricate model outputs as evaluation results.
+The local Transformers inference adapter is implemented but not runnable in the inspected environment yet: PyTorch, Transformers, and local Qwen3 model files are absent. A loopback-only OpenAI-compatible client can connect to a local inference server; it does not use credentials or send prompts to remote hosts. Install/use model dependencies only when preparing to run real inference. Tests use fake `ModelClient` instances and do not fabricate model outputs as evaluation results.
 
-The implementation uses the Python standard library for parsing, schemas, orchestration, and tests. Its suite runs with `python3 -m unittest discover -v`; actual `LocalTransformersClient` generation requires the optional `torch` and `transformers` packages.
+The implementation uses the Python standard library for parsing, schemas, orchestration, CLI, and tests. Its suite runs with `python3 -m unittest discover -v`; actual `LocalTransformersClient` generation requires the optional `torch` and `transformers` packages.
 
 ## Phase A3 bounded agent loop
 
 `AgentLoop` receives a user request, passes the five schemas to `ModelClient`, validates each response before execution, appends each tool observation as a `tool` message, and repeats until normal assistant text or a stop condition. `AgentConfig` sets maximum tool calls, wall-clock execution time, conversation characters, and serialized tool-output characters. Calls beyond the tool limit are recorded as skipped; oversized observations are clipped and marked. The loop records timestamped model/tool events, request, arguments, results, final response, and stop reason in `AgentTrajectory.to_dict()`.
 
 The deadline is cooperative across Python operations: it is passed to the model client and to shell/Git timeout handling, and the loop will not start another action after the deadline. A model backend must honor its timeout contract; synchronous file/grep operations cannot be forcibly interrupted mid-call. The loop does not add planning or long-term memory.
+
+## Phase A4 CLI
+
+The source checkout includes a `term-agent` launcher and `cli.py`. Run a task against an explicit project directory with:
+
+```sh
+./term-agent --workspace ./my-project "Fix the failing authentication tests"
+```
+
+The launcher is also named `term-agent`; add the checkout directory to `PATH` to invoke it without the `./` prefix.
+
+Without `--workspace`, the CLI creates a fresh temporary directory outside the home directory and removes it at exit. This default is isolated and starts empty; pass a project/task directory explicitly when the agent needs to inspect existing files. The tool layer still enforces workspace-relative file operations and its shell guardrails; it is a workspace-scoped guardrail, not an operating-system sandbox.
+
+Tasks can also be piped from scripts or entered interactively when no task argument is given:
+
+```sh
+printf '%s\n' 'Summarize the workspace files' | ./term-agent --workspace ./my-project
+```
+
+Use `--model-path /path/to/checkpoint` for local Transformers inference (default: `Qwen/Qwen3-1.7B`, local files only), or `--model-endpoint http://127.0.0.1:8080/v1/chat/completions --model-name Qwen3-1.7B` for a local OpenAI-compatible server. Endpoints are restricted to loopback addresses. `--max-steps N` sets the tool-call limit. The CLI prints model/action summaries, tool results, and the final response. Exit status is `0` on completion, `2` for input/workspace errors, `3` for the step limit, `4` for time/conversation limits, and nonzero for model or agent errors.
+
+The path through the harness is:
+
+```text
+task input → CLI/workspace → ModelClient + five tool schemas → AgentLoop
+                                                    ↑            ↓
+                                         model response ← ToolExecutor/Toolbox
+```
+
+The CLI logs the completed trajectory in order and displays bounded tool observations; detailed timestamps, arguments, outcomes, and stop reason remain available in `AgentResult.trajectory` for future integrations.
 
 ## Hardware constraints
 

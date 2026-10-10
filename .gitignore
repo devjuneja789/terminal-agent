@@ -1,0 +1,27 @@
+# Python bytecode and test/tool caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local Python environments
+.venv/
+venv/
+env/
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+
+# Local agent logs and generated model artifacts
+.terminal-slm/
+models/
+checkpoints/
+*.gguf
+*.safetensors
+*.pt
+*.pth
