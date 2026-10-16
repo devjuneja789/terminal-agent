@@ -16,7 +16,7 @@ Can supervised fine-tuning, with optional preference or reward optimization, mak
 - **F — Optional GRPO:** test reward-based optimization if the benchmark reward is stable and cloud compute is available.
 - **G — GGUF and local deployment:** quantize the selected checkpoint and run it with llama.cpp locally; compare it against the baseline.
 
-The intended order is **Qwen3-1.7B → tool-calling agent → executable benchmark → baseline evaluation → QLoRA SFT → optional DPO → optional GRPO → GGUF → local llama.cpp deployment**. Phases A1–A4 are implemented. Actual model inference, benchmark work, and training have not run.
+The intended order is **Qwen3-1.7B → tool-calling agent → executable benchmark → baseline evaluation → QLoRA SFT → optional DPO → optional GRPO → GGUF → local llama.cpp deployment**. Phases A1–A4 are implemented. A manual model smoke suite is prepared, but actual Qwen3 inference has not run yet. Benchmark work and training have not started.
 
 ## Phase A1 architecture
 
@@ -80,7 +80,7 @@ Tasks can also be piped from scripts or entered interactively when no task argum
 printf '%s\n' 'Summarize the workspace files' | ./term-agent --workspace ./my-project
 ```
 
-Use `--model-path /path/to/checkpoint` for local Transformers inference (default: `Qwen/Qwen3-1.7B`, local files only), or `--model-endpoint http://127.0.0.1:8080/v1/chat/completions --model-name Qwen3-1.7B` for a local OpenAI-compatible server. Endpoints are restricted to loopback addresses. `--max-steps N` sets the tool-call limit. The CLI prints model/action summaries, tool results, and the final response. Exit status is `0` on completion, `2` for input/workspace errors, `3` for the step limit, `4` for time/conversation limits, and nonzero for model or agent errors.
+Use `--model-path /path/to/checkpoint` for local Transformers inference (default: `Qwen/Qwen3-1.7B`, local files only), or `--model-endpoint http://127.0.0.1:8080/v1/chat/completions --model-name Qwen3-1.7B` for a local OpenAI-compatible server. Endpoints are restricted to loopback addresses. `--max-steps N` sets the tool-call limit and `--max-seconds N` sets the run time limit, including lazy model loading. The CLI prints model/action summaries, tool results, and the final response. Exit status is `0` on completion, `2` for input/workspace errors, `3` for the step limit, `4` for time/conversation limits, and nonzero for model or agent errors.
 
 The path through the harness is:
 
@@ -91,6 +91,26 @@ task input → CLI/workspace → ModelClient + five tool schemas → AgentLoop
 ```
 
 The CLI logs the completed trajectory in order and displays bounded tool observations; detailed timestamps, arguments, outcomes, and stop reason remain available in `AgentResult.trajectory` for future integrations.
+
+## Phase A model smoke gate
+
+`evals/manual_smoke.py` defines five disposable repository tasks: locate a function, find an environment variable, read a file, run one existing unit test, and write a marker file. Each task uses a temporary copy of the checkout, stores the complete timestamped trajectory and per-task metrics in `research/results/manual_smoke_*.jsonl`, and checks its result with a small explicit verifier. This is a harness integration check, not the Phase B benchmark.
+
+The initial smoke attempt on 2026-10-10 was blocked by missing dependencies and weights. On 2026-10-16 the checkpoint loaded and all five tasks completed the agent loop. The first report showed 3/5 because two smoke verifiers misread valid results: `unittest` writes its `OK` summary to stderr, and the marker request did not require a trailing newline. Both verifiers now match the observed behavior, so the saved trajectories support a corrected 5/5 smoke outcome; rerun the suite with the updated verifier before treating that as a fresh recorded pass. The earlier inference bug and its fix are documented in `DEVELOPMENT.md`. Use `--model-path` when weights are stored in a non-default local directory.
+
+## Phase B executable benchmark framework
+
+The initial version contains 50 deterministic tasks across ten categories, with a pinned miniapp repository snapshot and independent task workspaces. The split is fixed at 40 train-support and 10 held-out evaluation tasks. Held-out IDs are frozen in `evals/benchmark/manifest.json`; the loader, evaluator CLI, metrics, and result format are documented in [evals/benchmark/README.md](evals/benchmark/README.md). Evaluation writes trajectories and summaries to split-specific result directories. Held-out tasks are excluded from support runs and training trajectory generation.
+
+## What to do at each phase gate
+
+- **A — Harness and smoke:** install a PyTorch build that supports the GTX 1060's Pascal architecture, install a compatible Transformers version, make the Qwen3-1.7B weights available locally, verify CUDA in the same WSL environment, then rerun the five-task smoke suite. Do not move to baseline claims until several real tasks pass and trajectories have been reviewed.
+- **B — Benchmark:** review and approve task scope, isolation, and objective checks; create the formal benchmark only after the A smoke gate passes.
+- **C — Baseline:** freeze the base model/runtime/configuration, run every benchmark task, inspect failures, and retain raw trajectories and aggregate metrics.
+- **D — QLoRA SFT:** choose/verify a cloud GPU, curate and review training examples, pin a separate training environment, and save the config, data version, and checkpoint metadata.
+- **E — Optional DPO:** proceed only if reviewed preference pairs exist and baseline errors show a preference-learning opportunity; compare against the unchanged baseline.
+- **F — Optional GRPO:** proceed only if the benchmark reward is stable and cloud compute is available; log reward definitions, sampling settings, and all runs.
+- **G — GGUF/local deployment:** select the checkpoint, quantize it, run llama.cpp on the target machine, and compare tool behavior and task outcomes against the recorded baseline.
 
 ## Hardware constraints
 

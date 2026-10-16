@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import time
+import traceback
 from dataclasses import dataclass
 from typing import Any
 
@@ -80,7 +81,11 @@ class AgentLoop:
                 state.trajectory.finish_event(model_event)
                 return self._finish(state, executed_calls, turns, StopReason.EXECUTION_TIMEOUT)
             except Exception as exc:
-                model_event.error = f"model inference failed: {exc}"
+                detail = "".join(traceback.format_exception(exc, limit=8)).rstrip()
+                model_event.error = (
+                    f"model inference failed ({type(exc).__module__}.{type(exc).__qualname__}): "
+                    f"{exc!r}\n{detail}"
+                )
                 state.trajectory.finish_event(model_event)
                 return self._finish(state, executed_calls, turns, StopReason.MODEL_ERROR)
 

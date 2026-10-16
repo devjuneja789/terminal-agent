@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "run_kind": "benchmark_evaluation_summary",
+  "benchmark_id": "terminal-slm-initial-v1",
+  "split": "train-support",
+  "model_path": "./models/Qwen3-1.7B",
+  "task_ids": [
+    "B001",
+    "B002",
+    "B003"
+  ],
+  "metrics": {
+    "task_count": 3,
+    "successful_tasks": 1,
+    "task_success_rate": 0.3333333333333333,
+    "tool_selection_accuracy": 1.0,
+    "argument_schema_validity": 1.0,
+    "invalid_tool_call_rate": 0.0,
+    "average_tool_steps_per_task": 1.0,
+    "average_model_turns_per_task": 2.0,
+    "average_tokens_per_task": 1722.6666666666667,
+    "token_metric_tasks": 3,
+    "average_latency_seconds": 209.90664866666668,
+    "failure_categories": {
+      "task_contract_failure": 1,
+      "tool_execution": 1
+    }
+  }
+}

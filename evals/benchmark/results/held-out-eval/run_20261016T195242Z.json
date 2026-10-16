@@ -1,0 +1,275 @@
+{
+  "schema_version": 1,
+  "run_id": "20261016T195257Z",
+  "run_kind": "benchmark_evaluation_summary",
+  "benchmark_id": "terminal-slm-initial-v1",
+  "split": "held-out-eval",
+  "model_path": "./models/Qwen3-1.7B",
+  "task_ids": [
+    "B005",
+    "B010",
+    "B015",
+    "B020",
+    "B025",
+    "B030",
+    "B035",
+    "B040",
+    "B045",
+    "B050"
+  ],
+  "experiment_metadata": {
+    "model": {
+      "requested_id_or_path": "./models/Qwen3-1.7B",
+      "resolved_path": "/mnt/e/terminal-agent/models/Qwen3-1.7B",
+      "config_name_or_path": null,
+      "config_commit_hash": null,
+      "model_type": "qwen3",
+      "architectures": [
+        "Qwen3ForCausalLM"
+      ],
+      "config_sha256": "1ddb5b89ebc90dcb417a45c213d818577e65976454d29385c8f6140771d95197",
+      "weight_file_inventory": [
+        {
+          "path": "config.json",
+          "size_bytes": 726
+        },
+        {
+          "path": "model-00001-of-00002.safetensors",
+          "size_bytes": 3441185608
+        },
+        {
+          "path": "model-00002-of-00002.safetensors",
+          "size_bytes": 622329984
+        },
+        {
+          "path": "model.safetensors.index.json",
+          "size_bytes": 25605
+        }
+      ],
+      "packages": {
+        "torch": "2.14.0+cu126",
+        "transformers": "5.19.0",
+        "tokenizers": "0.23.3"
+      },
+      "inference_configuration": {
+        "device_requested": "cuda",
+        "dtype": "float16",
+        "quantization": "none",
+        "max_new_tokens": 512,
+        "enable_thinking": false,
+        "local_files_only": true,
+        "do_sample": false,
+        "use_cache": true
+      }
+    },
+    "benchmark": {
+      "benchmark_id": "terminal-slm-initial-v1",
+      "split": "held-out-eval",
+      "split_task_ids": [
+        "B005",
+        "B010",
+        "B015",
+        "B020",
+        "B025",
+        "B030",
+        "B035",
+        "B040",
+        "B045",
+        "B050"
+      ],
+      "snapshot_hashes": [
+        "64a99972f1e042cd9f1708e13a865fc1416977af190f3e7124a4ee484d0474a5"
+      ]
+    },
+    "prompt": {
+      "name": "DEFAULT_SYSTEM_PROMPT",
+      "text": "You are a terminal coding assistant working only in the supplied task workspace. Use the provided shell, read_file, write_file, grep, and git tools when needed. For a tool call, emit Qwen3's native format exactly as <tool_call>{\"name\":\"tool_name\",\"arguments\":{}}</tool_call>. Use only arguments allowed by the provided schemas. After observing tool results, continue with another tool call if needed. When the task is complete, answer in plain text without a tool-call block.",
+      "sha256": "a715a2ea1a78b7ba910f1dcd2e1fea740a1ace525d262a328eeba1374042075a",
+      "enable_thinking": false
+    },
+    "tool_schemas": {
+      "definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "shell",
+            "description": "Run a command from the current task workspace.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "command": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Shell command to run."
+                },
+                "timeout": {
+                  "type": "number",
+                  "minimum": 0.001,
+                  "maximum": 300,
+                  "default": 30
+                }
+              },
+              "required": [
+                "command"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "read_file",
+            "description": "Read a UTF-8 file from the task workspace using 1-based inclusive line numbers.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Workspace-relative file path."
+                },
+                "start_line": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 1
+                },
+                "end_line": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "write_file",
+            "description": "Write UTF-8 text to a workspace-relative file, creating parent directories.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Workspace-relative file path."
+                },
+                "content": {
+                  "type": "string",
+                  "description": "Complete file contents."
+                }
+              },
+              "required": [
+                "path",
+                "content"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "grep",
+            "description": "Search a workspace file or directory with a Python regular expression.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "pattern": {
+                  "type": "string",
+                  "description": "Regular expression to search for."
+                },
+                "path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Workspace-relative file or directory."
+                }
+              },
+              "required": [
+                "pattern",
+                "path"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "git",
+            "description": "Run an allowed Git subcommand in the task workspace.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "command": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Git subcommand and arguments."
+                },
+                "timeout": {
+                  "type": "number",
+                  "minimum": 0.001,
+                  "maximum": 300,
+                  "default": 30
+                }
+              },
+              "required": [
+                "command"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      ],
+      "sha256": "cb24a19bf8fea75e2e716ddc69cb9a2205916c740f29ef8266c931e2db679eb6"
+    },
+    "agent_configuration": {
+      "max_tool_calls": 16,
+      "max_execution_time_seconds": 600.0,
+      "validation_timeout_seconds": 120.0
+    },
+    "hardware": {
+      "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+      "machine": "x86_64",
+      "processor": "x86_64",
+      "cpu_count": 12,
+      "ram_bytes": 8217903104,
+      "torch_version": "2.14.0+cu126",
+      "cuda_runtime_version": "12.6",
+      "cuda_available": true,
+      "gpus": [
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce GTX 1060 with Max-Q Design",
+          "total_memory_bytes": 6442319872,
+          "compute_capability": "6.1"
+        }
+      ],
+      "nvidia_driver_versions": [
+        "582.78"
+      ]
+    }
+  },
+  "metrics": {
+    "task_count": 10,
+    "successful_tasks": 1,
+    "task_success_rate": 0.1,
+    "tool_selection_accuracy": 0.17647058823529413,
+    "argument_schema_validity": 1.0,
+    "invalid_tool_call_rate": 0.0,
+    "average_tool_steps_per_task": 2.5,
+    "average_model_turns_per_task": 3.5,
+    "average_tokens_per_task": 4554.8,
+    "token_metric_tasks": 10,
+    "average_latency_seconds": 72.7811432,
+    "failure_categories": {
+      "tool_execution": 7,
+      "validation_failure": 2
+    }
+  }
+}

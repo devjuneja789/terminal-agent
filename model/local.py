@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
@@ -50,6 +51,8 @@ class LocalTransformersClient(ModelClient):
         self._tokenizer: Any | None = None
         self._torch: Any | None = None
         self._resolved_device: str | None = None
+        self.prompt_tokens_seen = 0
+        self.generated_tokens_seen = 0
 
     def _load(self) -> None:
         if self._model is not None:
@@ -60,7 +63,7 @@ class LocalTransformersClient(ModelClient):
         except ImportError as exc:
             raise RuntimeError(
                 "LocalTransformersClient requires torch and transformers; "
-                "no packages or model files were installed during Phase A2."
+                "install a compatible runtime before running local inference."
             ) from exc
 
         resolved_device = self.device
@@ -103,7 +106,11 @@ class LocalTransformersClient(ModelClient):
     ) -> str:
         if timeout is not None and timeout <= 0:
             raise TimeoutError("no inference time remains")
+        started = time.monotonic()
         self._load()
+        remaining = None if timeout is None else timeout - (time.monotonic() - started)
+        if remaining is not None and remaining <= 0:
+            raise TimeoutError("model loading exhausted the inference time budget")
         assert self._torch is not None
         assert self._tokenizer is not None
         assert self._model is not None
@@ -115,20 +122,26 @@ class LocalTransformersClient(ModelClient):
             tokenize=True,
             add_generation_prompt=True,
             enable_thinking=self.enable_thinking,
+            return_dict=True,
             return_tensors="pt",
         )
         rendered = rendered.to(self._resolved_device)
-        input_length = rendered.shape[-1]
+        input_length = rendered["input_ids"].shape[-1]
         with self._torch.inference_mode():
             generation_options: dict[str, Any] = {
                 "max_new_tokens": self.max_new_tokens,
                 "do_sample": False,
                 "use_cache": True,
             }
-            if timeout is not None:
+            if remaining is not None:
                 # Transformers checks max_time between decoding steps.
-                generation_options["max_time"] = timeout
-            generated = self._model.generate(rendered, **generation_options)
+                generation_options["max_time"] = remaining
+            generated = self._model.generate(**rendered, **generation_options)
+        generated_length = generated.shape[-1]
+        self.prompt_tokens_seen += input_length
+        self.generated_tokens_seen += max(0, generated_length - input_length)
+        if timeout is not None and time.monotonic() - started >= timeout:
+            raise TimeoutError("model inference exceeded the remaining time budget")
         new_tokens = generated[0, input_length:]
         return self._tokenizer.decode(new_tokens, skip_special_tokens=False)
 

@@ -80,10 +80,67 @@ A public Hugging Face search was also used to confirm that `Qwen/Qwen3-1.7B` is 
 
 The GPU itself is confirmed working, but compute capability 6.1 (Pascal) is actively being dropped across the local-inference/training stack as of September–October 2026. This needs explicit version pinning, not default installs:
 
-- **PyTorch — highest risk.** PyTorch wheels built against CUDA ≤12.6 still include Pascal (sm_61). Starting with the PyTorch 2.15 release, CUDA 12.6 wheels — the last ones covering Pascal — stop being published, because CUDA 13.x wheels only support Turing (sm_75) and newer. A plain `pip install torch` will grab the newest wheel and silently produce a build that can't see this GPU (`CUDA capability sm_61 is not compatible... supports sm_75 sm_80 sm_86 sm_90 sm_100 sm_120`). **Action:** always install a specific version + CUDA build, e.g. `pip install torch==2.7.1 --index-url https://download.pytorch.org/whl/cu126`, and never let a later `pip install -U torch` replace it with an unpinned build.
+- **PyTorch — highest risk.** PyTorch wheels built against CUDA ≤12.6 include Pascal (sm_61). CUDA 13.x wheels drop Maxwell/Pascal/Volta; the PyTorch release notice currently identifies 2.14.0 with CUDA 12.6 as the compatible legacy install while that build remains available. A plain `pip install torch` can select a build that cannot use this GPU. **Action:** pin the version and CUDA build and recheck the [current PyTorch compatibility notice](https://dev-discuss.pytorch.org/t/notice-cuda-12-6-wheels-will-no-longer-be-published-from-pytorch-2-15-drops-maxwell-pascal-volta/3432) before installing.
 - **bitsandbytes (QLoRA) — supported, contingent on the PyTorch pin above.** Hugging Face's bitsandbytes docs list both NF4/FP4 quantization and 8-bit optimizers as supported on NVIDIA Pascal (GTX 10X0 series, P100) or newer. QLoRA itself is not the blocker here; it only breaks if the underlying PyTorch build already dropped sm_61.
 - **llama.cpp (Phase G, local deployment) — needs the CUDA 12.4 asset, not the latest release.** llama.cpp's CUDA 13.x builds drop Pascal the same way PyTorch's do, but a separate CUDA 12.4 release asset that explicitly retains compute 6.1 was still being published alongside the 13.x builds as of mid-August 2026. Download that asset specifically for local GGUF inference on this GPU.
 - **Driver is already sufficient.** Pascal (compute capability 5.0–6.2) needs driver 570 or newer; this machine is on 582.78.
 - **None of this affects Phases D–F (SFT/DPO/GRPO)** — those run on cloud GPUs with no Pascal constraint. It only matters for local dev, local eval, and the final local quantized-inference phase.
+
+## Phase A model smoke check (2026-10-10)
+
+This check was run in the current coding session, which is more restricted than the plain WSL terminal described above:
+
+| Item | Current-session result |
+|---|---|
+| Python | 3.12.3 |
+| `torch` / `transformers` / `huggingface_hub` | Not installed |
+| Qwen3 cache / repository `models/` / `checkpoints/` | Not present |
+| `nvidia-smi` executable | Present, but NVML reports GPU access blocked by the operating system |
+| Model inference | Not started; no model behavior was observed |
+
+The runner `python3 -m evals.manual_smoke` is ready, but its first run is expected to record five inference setup failures until the runtime and weights are supplied. Its JSONL output contains full model/tool trajectories; setup errors are labeled failed and are not presented as model-evaluation data. Every task works in a disposable copy of this repository, so the trivial file-write task cannot modify the real checkout.
+
+### Owner actions to unblock Phase A
+
+1. In the WSL environment where `nvidia-smi` sees the GTX 1060, create and activate a project virtual environment: `python3 -m venv .venv && source .venv/bin/activate`.
+2. Install a PyTorch CUDA build that still includes Pascal (`sm_61`) support. As of this report, the PyTorch release guidance identifies the CUDA 12.6 build as the legacy option for Pascal and says to pin PyTorch 2.14 while that build is available. The official install command is `python -m pip install torch==2.14.0 --index-url https://download.pytorch.org/whl/cu126`; confirm the current compatibility notice before installing because wheel support changes over time. See [PyTorch's CUDA 12.6/Pascal notice](https://dev-discuss.pytorch.org/t/notice-cuda-12-6-wheels-will-no-longer-be-published-from-pytorch-2-15-drops-maxwell-pascal-volta/3432) and [official previous-version commands](https://pytorch.org/get-started/previous-versions/).
+3. Install the model runtime with `python -m pip install 'transformers>=4.51.0' huggingface_hub`. The Qwen3 model card says Transformers versions older than 4.51.0 do not recognize the `qwen3` model type; use the [Qwen3-1.7B model card](https://huggingface.co/Qwen/Qwen3-1.7B) as the source of current model-specific instructions.
+4. Verify in that same shell before downloading weights:
+
+   ```sh
+   nvidia-smi
+   python -c 'import torch; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else "no CUDA device")'
+   ```
+
+   If CUDA is false or the device is unsupported, stop and resolve the PyTorch/GPU compatibility issue; do not install training packages for this smoke test.
+5. If Hugging Face access is available and you accept the model's terms, download the base weights explicitly: `hf download Qwen/Qwen3-1.7B --local-dir models/Qwen3-1.7B`. The harness itself uses `local_files_only=True` and will not download them implicitly. A local checkpoint path avoids needing credentials in the agent process.
+6. From the active environment, first run `python3 -m unittest discover -v`, then run `python3 -m evals.manual_smoke --model-path models/Qwen3-1.7B --max-seconds 600`. The first task includes lazy model loading; `--max-seconds` is per task and the smoke runner reuses the loaded model for later tasks. The default 120 seconds can be too short for a cold load on this machine. Review every raw trajectory and failed verifier before claiming the Phase A smoke gate passes. Do not modify the model weights.
+
+### What to do at the end of each research phase
+
+- **A — Harness:** you supply the compatible local inference runtime and base weights, run the manual smoke tasks, and review trajectory failures. A is ready to exit only after several tasks complete through tool call, observation, and final answer.
+- **B — Formal benchmark:** review/approve task definitions, workspace isolation, and objective checkers before the benchmark set is frozen. No model installation beyond A's base inference setup is needed to author it.
+- **C — Baseline:** approve a frozen run configuration; run all benchmark tasks with the unchanged base model; retain per-task trajectories, outcomes, latency, and aggregate metrics before training changes anything.
+- **D — QLoRA SFT:** provide/choose a cloud GPU allocation, prepare reviewed training examples, and approve a separate pinned training environment and storage plan. Training packages belong in that cloud environment, not the local smoke environment by default.
+- **E — Optional DPO:** first review preference-pair data and decide whether baseline failures justify DPO; if not, skip E. If yes, provide/approve the data and cloud run budget.
+- **F — Optional GRPO:** first approve a stable benchmark reward and cloud compute plan; if either is missing, skip F. Review the reward and run logs before accepting a checkpoint.
+- **G — GGUF/local deployment:** choose the candidate checkpoint and quantization, then validate the artifact and tool behavior in llama.cpp on the target local machine. Install llama.cpp only at this phase; compare against the saved base-model baseline.
+
+## WSL inference attempt update (2026-10-16)
+
+The project owner reports that the local environment now has a `.venv` and the checkpoint at `models/Qwen3-1.7B`. The CLI was first run without `--model-path`, so it selected its default `Qwen/Qwen3-1.7B` identifier. Since `LocalTransformersClient` uses `local_files_only=True`, it searched the Hugging Face cache and failed; it does not look in `./models/Qwen3-1.7B` automatically. For the coding task, `--workspace ./my-project` also selects that separate directory; use `--workspace .` when the current checkout is the repository to edit.
+
+The subsequent smoke run passed `--model-path models/Qwen3-1.7B` and reported all 311 weight shards loaded, but all five tasks then ended with `model_error`, no tool call, and no model output. The traceback identified a client bug: `apply_chat_template` returned a Transformers `BatchEncoding`, while the client treated it as a tensor and accessed `.shape`. The client now requests a dictionary-style encoding, gets the input length from `input_ids`, and calls `model.generate(**encoded, ...)`, including the attention mask. A dependency-free regression test covers this interface. The deprecated `torch_dtype` warning was unrelated.
+
+The code also records exception class and traceback in model events, counts model loading against the per-run deadline, and exposes `--max-seconds`. The real end-to-end smoke gate remains open until these commands pass on the owner’s machine:
+
+```sh
+./term-agent --model-path ./models/Qwen3-1.7B --workspace . --max-seconds 600 "Fix the failing authentication tests"
+python -m evals.manual_smoke --model-path ./models/Qwen3-1.7B --max-seconds 600
+```
+
+The owner reran the suite at `research/results/manual_smoke_20261016T180925Z.jsonl`. All five tasks completed with one successful tool call each. The two reported failures were verifier false negatives: the unittest command exited successfully and printed `OK` to stderr, while its verifier only searched stdout; the marker file contained exactly the requested text but no final newline, while the verifier required one. Updated verifiers check both output streams and accept either exact one-line representation. The saved run therefore qualifies as 5/5 on corrected checks, though a fresh run is recommended to record the corrected result directly.
+
+The first command deliberately targets the current checkout; use a different explicit workspace if that is not the repository you intend to edit. The timeout is per task and includes cold model loading; this code cannot interrupt synchronous model loading, but it will stop before generation if loading consumes the budget. Inspect the new trajectory's traceback if inference still fails. Do not treat any of these as tool/parser failures until a model response is actually recorded.
 
 

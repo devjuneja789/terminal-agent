@@ -7,6 +7,7 @@ import unittest
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Sequence
+from unittest.mock import patch
 
 from agent.loop import AgentLoop
 from agent.parser import ToolCallValidationError, parse_assistant_response
@@ -56,6 +57,68 @@ class NativeToolCallParserTests(unittest.TestCase):
         self.assertIsNone(client._tokenizer)
         with self.assertRaises(ValueError):
             LocalTransformersClient(max_new_tokens=0)
+
+    def test_local_client_counts_model_loading_against_timeout(self) -> None:
+        client = LocalTransformersClient()
+        with patch.object(client, "_load", side_effect=lambda: time.sleep(0.02)):
+            with self.assertRaisesRegex(TimeoutError, "model loading exhausted"):
+                client.generate([], [], timeout=0.001)
+
+    def test_local_client_generates_from_transformers_batch_encoding(self) -> None:
+        class FakeTensor:
+            shape = (1, 3)
+
+        class FakeBatchEncoding(dict):
+            def to(self, device):
+                self.device = device
+                return self
+
+        class FakeGenerated:
+            shape = (1, 5)
+
+            def __getitem__(self, key):
+                self.key = key
+                return [11, 12]
+
+        class FakeTokenizer:
+            def apply_chat_template(self, messages, **kwargs):
+                self.template_kwargs = kwargs
+                self.messages = messages
+                return FakeBatchEncoding(input_ids=FakeTensor(), attention_mask="mask")
+
+            def decode(self, tokens, *, skip_special_tokens):
+                self.decoded_tokens = tokens
+                self.skip_special_tokens = skip_special_tokens
+                return '<tool_call>{"name":"shell","arguments":{"command":"pwd"}}</tool_call>'
+
+        class FakeModel:
+            def generate(self, **kwargs):
+                self.generate_kwargs = kwargs
+                return FakeGenerated()
+
+        class FakeTorch:
+            @staticmethod
+            def inference_mode():
+                from contextlib import nullcontext
+
+                return nullcontext()
+
+        client = LocalTransformersClient()
+        client._model = FakeModel()
+        client._tokenizer = FakeTokenizer()
+        client._torch = FakeTorch()
+        client._resolved_device = "cpu"
+
+        response = client.generate([{"role": "user", "content": "Where am I?"}], [])
+
+        self.assertIn("<tool_call>", response)
+        self.assertTrue(client._tokenizer.template_kwargs["return_dict"])
+        self.assertEqual(client._model.generate_kwargs["input_ids"].shape, (1, 3))
+        self.assertEqual(client._model.generate_kwargs["attention_mask"], "mask")
+        self.assertEqual(client._model.generate_kwargs["max_new_tokens"], client.max_new_tokens)
+        self.assertEqual(client._tokenizer.decoded_tokens, [11, 12])
+        self.assertEqual(client.prompt_tokens_seen, 3)
+        self.assertEqual(client.generated_tokens_seen, 2)
 
     def test_tool_definitions_use_standard_openai_function_schemas(self) -> None:
         schemas = get_tool_schemas()
@@ -128,6 +191,17 @@ class AgentLoopTests(unittest.TestCase):
         self.assertEqual(result.final_text, "No tool is needed.")
         self.assertEqual(result.tool_calls, ())
         self.assertEqual(result.turns, 1)
+
+    def test_model_inference_errors_include_exception_type_and_traceback(self) -> None:
+        class FailingClient(ModelClient):
+            def generate(self, messages, tools, *, timeout=None) -> str:
+                raise RuntimeError()
+
+        result = AgentLoop(FailingClient(), self.executor).run("Trigger an inference error")
+        self.assertEqual(result.stop_reason, StopReason.MODEL_ERROR)
+        error = result.trajectory.events[0].error or ""
+        self.assertIn("builtins.RuntimeError", error)
+        self.assertIn("Traceback", error)
 
     def test_one_tool_call_then_final_answer_records_complete_trajectory(self) -> None:
         model = MockModelClient(

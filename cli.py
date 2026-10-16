@@ -42,6 +42,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model-name", default="Qwen3-1.7B", help="model name sent to a local endpoint")
     parser.add_argument("--workspace", type=Path, help="explicit project/task directory; default is temporary")
     parser.add_argument("--max-steps", type=_positive_int, default=16, help="maximum executed tool calls")
+    parser.add_argument(
+        "--max-seconds",
+        type=_positive_float,
+        default=120.0,
+        help="maximum wall-clock time for the agent run, including model loading (default: %(default)s)",
+    )
     return parser
 
 
@@ -52,6 +58,16 @@ def _positive_int(value: str) -> int:
         raise argparse.ArgumentTypeError("must be an integer") from exc
     if parsed < 0:
         raise argparse.ArgumentTypeError("must be zero or greater")
+    return parsed
+
+
+def _positive_float(value: str) -> float:
+    try:
+        parsed = float(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("must be a number") from exc
+    if parsed <= 0 or parsed == float("inf") or parsed != parsed:
+        raise argparse.ArgumentTypeError("must be finite and greater than zero")
     return parsed
 
 
@@ -125,7 +141,10 @@ def main(
         loop = AgentLoop(
             client,
             ToolExecutor(toolbox),
-            config=AgentConfig(max_tool_calls=args.max_steps),
+            config=AgentConfig(
+                max_tool_calls=args.max_steps,
+                max_execution_time_seconds=args.max_seconds,
+            ),
         )
         result = loop.run(task)
         _print_trajectory(result, stdout)
