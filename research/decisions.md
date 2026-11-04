@@ -2,6 +2,8 @@
 
 This file records project decisions and their rationale. Phases A1–A4 establish the tool boundary, native model/tool-call interface, bounded execution loop, and CLI. The manual Qwen3 smoke gate is prepared but blocked on local inference prerequisites; benchmark and training decisions remain open.
 
+> Historical note: the initial paragraphs below describe the original Qwen3 plan. The active hackathon pivot and current phase status are recorded in `HACKATHON-PIVOT-TRACK-3.md` and EXP-003.
+
 ## Initial direction
 
 - **Starting model:** `Qwen/Qwen3-1.7B`.
@@ -70,3 +72,12 @@ This file records project decisions and their rationale. Phases A1–A4 establis
 - **Gate remains open:** after a compatible runtime and locally available base weights are provided, rerun the same tasks, inspect each complete trace, and diagnose any failures by layer before claiming an end-to-end milestone or beginning Phase B.
 - **2026-10-16 owner run:** the default CLI path selected `Qwen/Qwen3-1.7B` and failed to load offline because weights were stored at `models/Qwen3-1.7B`; use an explicit `--model-path`. With the explicit path, 311 model weight shards loaded, but generation failed at `rendered.shape`: this Transformers version returned a `BatchEncoding`, not a tensor. `LocalTransformersClient` now uses `return_dict=True`, reads `input_ids.shape`, and passes the mapping as keyword arguments to `generate`. A unit regression test simulates that object without loading packages or weights. Rerun the smoke tasks with the explicit local path to verify real inference; no successful end-to-end task is claimed yet.
 - **2026-10-16 smoke follow-up:** the owner reran the suite and all five tasks completed with successful tool execution. The original output reported 3/5 because two verifiers were too strict: unittest wrote `OK` to stderr, and the requested marker was written without a trailing newline. The verifiers now account for both. The saved trajectories support 5/5 under corrected checks; a fresh run is recommended so the JSONL directly records that verifier revision.
+
+## Hackathon Phase 2 decisions (2026-11-04)
+
+- **Pin model and software before baseline:** `configs/tiny_aya_eval.json` pins the Tiny Aya Hub revision, FP16, Python 3.12, PyTorch 2.11.0, Transformers 5.22.1, Accelerate 1.15.0, AgentTune 1.1.3, prompt, and tool-schema hashes. This avoids silently changing the before/after evaluation environment.
+- **Use the AgentTune Cohere path:** Tiny Aya uses AgentTune's Cohere fallback action format; the original Qwen native parser remains a separate historical route. AgentTune handles rollouts and tool orchestration, while Terminal-SLM's existing workspace tools and executable validators remain the authority for task state.
+- **Freeze rather than edit benchmark:** the benchmark version and all ten held-out IDs are asserted before inference. No benchmark task or split has been modified in Phase 2.
+- **Make held-out access explicit:** the cloud baseline bundle contains the held-out JSONL and a held-out-only manifest, but no support JSONL. Training rollout generation must use a separately prepared support-only bundle.
+- **Separate setup from results:** Phase 2 creates the evaluator and launch path only. No model inference, baseline result, training run, or synthetic data was generated. Phase 3 is gated on the user's launch after checking live GPU Job cost and HF model access.
+- **Metric definitions:** malformed model outputs count as invalid tool attempts. Tool-selection accuracy is aggregated across tasks with the benchmark's required-versus-unexpected distinct tool formula. Task success still requires response, required tool, validator, and completion checks.

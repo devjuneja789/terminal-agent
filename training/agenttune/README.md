@@ -1,4 +1,4 @@
-# AgentTune and Hugging Face GPU smoke
+# AgentTune and Hugging Face GPU workflow
 
 Phase 1 uses a Hugging Face GPU Job for Tiny Aya Global inference. The local
 machine only stages the code bundle and submits the job; model weights are
@@ -12,6 +12,40 @@ and receives tool results as user turns. The existing `Toolbox` executes tools
 inside a temporary copy of the miniapp snapshot. The smoke validates the final
 response, a successful required `grep` call, and the selected task's validation command.
 It is not training or a formal benchmark run.
+
+## Phase 2 frozen held-out evaluation setup
+
+The formal baseline config is `configs/tiny_aya_eval.json`. It pins Tiny Aya's
+model revision, cloud package versions, decoding, prompt, schema hash, and the
+ten permanent held-out task IDs. The evaluator is
+`training/agenttune/evaluate_heldout.py`; it uses the existing benchmark
+snapshot-copy/validation runner and workspace-scoped `Toolbox`. It requires
+CUDA and refuses to start if the model revision, benchmark IDs, runtime pins,
+prompt hash, or schemas differ.
+
+The held-out job bundle is built by
+`training/agenttune/prepare_hf_eval_bundle.py`. It carries only the held-out
+task file, a manifest containing only held-out IDs, the required miniapp
+snapshot, and runtime code. It explicitly excludes `train_support.jsonl`.
+Keep this separation for the baseline; future rollout/training preparation
+must use a separate support-only bundle.
+
+To reproduce the Phase 3 baseline, check the live price and launch from the
+repository root:
+
+```sh
+hf auth whoami
+hf jobs hardware
+./scripts/run_tiny_aya_baseline.sh
+```
+
+The job has a 40-minute hard timeout. The launcher preserves the complete HF
+Job output and extracts `research/results/tiny-aya-baseline/<run-id>.jsonl`,
+`<run-id>.metadata.json`, and `<run-id>.summary.json`. Phase 3 is complete; the
+first run and separate trace-recovery run are recorded in EXP-004. Both scored
+0/10; the recovery run preserves all ten trajectories. Do not merge the two
+runs' records or metrics. Phase 4 is support-only rollout/reward validation;
+do not use held-out tasks or traces as training examples or reward targets.
 
 ## Run the Phase 1 smoke
 

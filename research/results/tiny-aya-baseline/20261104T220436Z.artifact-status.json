@@ -1,0 +1,22 @@
+{
+  "run_id": "20261104T220436Z",
+  "aggregate_summary_available": true,
+  "complete_task_records_available": false,
+  "complete_task_records_observed": 8,
+  "available_task_ids": [
+    "B010",
+    "B015",
+    "B020",
+    "B025",
+    "B035",
+    "B040",
+    "B045",
+    "B050"
+  ],
+  "missing_task_ids": [
+    "B005",
+    "B030"
+  ],
+  "truncated_legacy_task_record_lines": 2,
+  "note": "Aggregate metrics were printed by the completed job, but Hugging Face truncated some long per-task trajectory lines. The partial JSONL contains only complete records; it is not the full run archive."
+}

@@ -9,7 +9,7 @@ cd /tmp/terminal-slm-phase1
 uv run \
   --python 3.12 \
   --with "torch==2.11.0" \
-  --with "transformers>=5.15,<6" \
-  --with accelerate \
-  --with "agenttune @ git+https://github.com/Lexsi-Labs/AgentTune.git" \
+  --with "transformers==5.22.1" \
+  --with "accelerate==1.15.0" \
+  --with "agenttune @ git+https://github.com/Lexsi-Labs/AgentTune.git@1.1.3" \
   python training/agenttune/hf_gpu_smoke.py

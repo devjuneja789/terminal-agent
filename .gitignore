@@ -25,3 +25,6 @@ checkpoints/
 *.safetensors
 *.pt
 *.pth
+
+# Verbose Hugging Face Job console logs (structured results are tracked)
+research/results/tiny-aya-baseline/*.log

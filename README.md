@@ -1,22 +1,23 @@
 # Terminal-SLM
 
-Terminal-SLM is a research project to build a small language model specialized for reliable terminal and tool use, embed it in a local terminal agent, and evaluate it on executable coding tasks.
+Terminal-SLM is a research project to improve reliable terminal/tool use on executable coding tasks. It began with Qwen3-1.7B and has pivoted for the Lexsi Track 3 hackathon to CohereLabs/Tiny Aya Global with AgentTune and AuditKIT. Model inference and any post-training for this submission run on Hugging Face GPU infrastructure; the local GTX 1060 is for development and CPU-only checks.
 
 ## Research question
 
-Can supervised fine-tuning, with optional preference or reward optimization, make Qwen3-1.7B more reliable at using a constrained terminal toolset to complete executable coding tasks than the unmodified model, under local inference constraints?
+Does AgentTune post-training improve Tiny Aya Global's success on isolated, executable terminal tasks while reducing invalid or inefficient tool actions, compared with the untouched model under a fixed evaluation procedure?
 
 ## Planned phases
 
-- **A — Agent harness:** connect the selected model to a constrained terminal/tool interface. **A1 (tool layer), A2 (model interface/native tool-call parsing), A3 (bounded loop/state/trajectory), and A4 (CLI) are implemented.**
-- **B — Executable benchmark:** define reproducible coding tasks, isolated workspaces, and objective success checks.
-- **C — Baseline evaluation:** evaluate the unmodified model and record reproducible metrics before training.
-- **D — QLoRA SFT:** train on curated terminal/tool-use demonstrations using cloud GPU resources.
-- **E — Optional DPO:** test preference optimization if suitable preference data and a clear need exist.
-- **F — Optional GRPO:** test reward-based optimization if the benchmark reward is stable and cloud compute is available.
-- **G — GGUF and local deployment:** quantize the selected checkpoint and run it with llama.cpp locally; compare it against the baseline.
+- **0 — Hackathon access/model choice: complete.** Tiny Aya Global access and HF GPU credits are confirmed by the user.
+- **1 — Cloud smoke: complete.** Tiny Aya completed a support-task tool-use smoke in an HF GPU Job; failure traces are retained.
+- **2 — Freeze baseline harness: complete.** The cloud runner, pinned config, and held-out-only bundle are prepared.
+- **3 — Untouched-model baseline: complete.** Tiny Aya scored 0/10 on the frozen held-out set. A same-config recovery run reproduced the metrics and captured all ten trajectories; see EXP-004.
+- **4 — Support-only rollouts/reward validation.** Use train-support tasks only after the base baseline is reviewed.
+- **5 — One bounded AgentTune fine-tuning pilot.** GRPO/LoRA is the planned route, subject to a successful reward and budget pilot; no training has started.
+- **6 — Paired AuditKIT evaluation.** Compare untouched and tuned model under the same frozen conditions.
+- **7 — Public packaging and submission.** Publish permitted artifacts and submit by the hackathon deadline.
 
-The intended order is **Qwen3-1.7B → tool-calling agent → executable benchmark → baseline evaluation → QLoRA SFT → optional DPO → optional GRPO → GGUF → local llama.cpp deployment**. Phases A1–A4 are implemented. A manual model smoke suite is prepared, but actual Qwen3 inference has not run yet. Benchmark work and training have not started.
+The original Qwen-focused research pipeline remains documented below as historical project context. The active hackathon sequence is **Tiny Aya base → fixed held-out baseline → support-only AgentTune rollouts → one bounded post-training pilot → paired AuditKIT evaluation → public submission**. DPO and local GGUF deployment are deferred for the hackathon timeframe. No Tiny Aya baseline or training result is claimed yet.
 
 ## Phase A1 architecture
 
@@ -91,6 +92,32 @@ task input → CLI/workspace → ModelClient + five tool schemas → AgentLoop
 ```
 
 The CLI logs the completed trajectory in order and displays bounded tool observations; detailed timestamps, arguments, outcomes, and stop reason remain available in `AgentResult.trajectory` for future integrations.
+
+## Terminal-SLM hackathon pivot
+
+For the Lexsi Track 3 submission, the selected model is CohereLabs/Tiny Aya
+Global. The Qwen3 architecture and historical results above are retained as
+prior project work; the hackathon inference and evaluation path uses Tiny Aya
+on Hugging Face GPU Jobs through AgentTune's Cohere fallback format. The frozen
+baseline and same-config trace-recovery run are recorded in EXP-004: 0/10
+held-out tasks passed, with complete traces available from the recovery run.
+
+The frozen configuration is `configs/tiny_aya_eval.json`. It pins the model
+revision, Python and package versions, decoding parameters, prompt, tool-schema
+hash, held-out task IDs, success rule, and limits. The baseline and a separate
+same-config trace recovery run are complete; see EXP-004 for results:
+
+```sh
+./scripts/run_tiny_aya_baseline.sh
+```
+
+The launcher stages a bundle containing only the ten permanent held-out task
+records and snapshot, invokes the model inside the cloud GPU job, and saves the
+complete job log, JSONL trajectories, environment metadata, and summary under
+`research/results/tiny-aya-baseline/`. It does not send held-out records to any
+training path. See `training/agenttune/README.md` and
+`research/experiments/EXP-003-tiny-aya-eval-config.md` for the frozen setup and
+the next phase gate.
 
 ## Phase A model smoke gate
 

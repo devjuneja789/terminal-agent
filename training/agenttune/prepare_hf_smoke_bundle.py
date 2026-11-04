@@ -10,6 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 COPY_PATHS = (
+    "configs/tiny_aya_eval.json",
     "tools",
     "evals/__init__.py",
     "evals/benchmark/__init__.py",

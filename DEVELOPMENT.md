@@ -100,6 +100,34 @@ This check was run in the current coding session, which is more restricted than 
 
 The runner `python3 -m evals.manual_smoke` is ready, but its first run is expected to record five inference setup failures until the runtime and weights are supplied. Its JSONL output contains full model/tool trajectories; setup errors are labeled failed and are not presented as model-evaluation data. Every task works in a disposable copy of this repository, so the trivial file-write task cannot modify the real checkout.
 
+## Hackathon cloud baseline environment (Phase 2, 2026-11-04)
+
+The hackathon path uses a separate cloud environment and does not use the local
+GTX 1060 for model inference. `configs/tiny_aya_eval.json` pins Python 3.12,
+PyTorch 2.11.0, Transformers 5.22.1, Accelerate 1.15.0, and AgentTune 1.1.3.
+These are intended cloud-job versions; they are not claimed as installed in the
+local WSL virtual environment. Tiny Aya Global is pinned to Hub revision
+`af89d219b53ed9b13b8a4645f9c8028973510324` and loaded in FP16 on a CUDA job.
+
+The smoke job installer now uses those exact package pins. Phase 2 added a
+separate held-out evaluator and a bundle builder that checks the permanent
+held-out order and leaves `train_support.jsonl` out of the job bundle. No
+formal baseline or training run was performed in this phase.
+
+Static checks used during implementation:
+
+```sh
+python3 -m py_compile training/agenttune/hf_gpu_smoke.py training/agenttune/evaluate_heldout.py training/agenttune/prepare_hf_eval_bundle.py scripts/extract_hf_baseline.py
+python3 training/agenttune/prepare_hf_eval_bundle.py --destination /tmp/terminal-slm-eval-check
+```
+
+The syntax check, frozen prompt/schema hash check, and held-out bundle staging
+completed. The staged bundle contained IDs B005, B010, B015, B020, B025, B030,
+B035, B040, B045, and B050, and no support task file. These are implementation
+checks only; they are not model evaluation results. The evaluator expects CUDA
+and verifies exact runtime versions, so running it locally without its pinned
+cloud dependencies is intentionally unsupported.
+
 ### Owner actions to unblock Phase A
 
 1. In the WSL environment where `nvidia-smi` sees the GTX 1060, create and activate a project virtual environment: `python3 -m venv .venv && source .venv/bin/activate`.
