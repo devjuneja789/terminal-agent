@@ -1,0 +1,100 @@
+# Manual Hugging Face publication steps
+
+The focused, checksummed upload payload is staged at:
+
+```text
+/tmp/terminal-slm-hf-focused
+```
+
+It contains two adapter cards, approved support data, the frozen held-out and
+EXP-027 evidence, and the fixed benchmark. It omits rejected/pending support
+candidates and older diagnostic runs. It does not contain base-model weights.
+
+## 1. Verify authentication and payload
+
+In the WSL terminal where you will upload:
+
+```sh
+cd /mnt/e/terminal-agent
+.venv/bin/hf auth whoami
+python3 - <<'PY'
+import json
+from pathlib import Path
+p=Path('/tmp/terminal-slm-hf-focused/release-manifest.json')
+m=json.loads(p.read_text())
+print(m['status'], len(m['files']), 'files')
+PY
+```
+
+If `whoami` is not the intended HF account, authenticate with
+`.venv/bin/hf auth login` in that terminal. Never paste the token into chat or a
+tracked file.
+
+## 2. Publish the two adapters
+
+These adapter repositories already contain the uploaded weights. In each HF
+repository's **Settings**, change visibility to Public. Then upload the
+corresponding model card from the focused payload:
+
+```sh
+.venv/bin/hf upload devjuneja789/terminal-slm-tiny-aya-joint-300-v1 \
+  /tmp/terminal-slm-hf-focused/models/README-terminal-slm-tiny-aya-joint-300-v1.md \
+  README.md --type model
+
+.venv/bin/hf upload devjuneja789/terminal-slm-tiny-aya-task-start-620-v1 \
+  /tmp/terminal-slm-hf-focused/models/README-terminal-slm-tiny-aya-task-start-620-v1.md \
+  README.md --type model
+```
+
+The first adapter is the EXP-025 held-out candidate. The second is an EXP-027
+support-only diagnostic; its card explicitly says it was not evaluated on
+held-out tasks. Do not upload or redistribute the base-model weights. Add the
+upstream Tiny Aya repo only as a linked item in the collection.
+
+## 3. Create and upload the datasets
+
+Create these two dataset repositories on Hugging Face, selecting **Public**:
+
+- `devjuneja789/terminal-slm-reviewed-support`
+- `devjuneja789/terminal-slm-evaluation-evidence`
+
+Then upload the staged folders:
+
+```sh
+.venv/bin/hf upload devjuneja789/terminal-slm-reviewed-support \
+  /tmp/terminal-slm-hf-focused/support-data . --type dataset
+
+.venv/bin/hf upload devjuneja789/terminal-slm-evaluation-evidence \
+  /tmp/terminal-slm-hf-focused/evaluation-logs . --type dataset
+```
+
+The support repository's license metadata is CC-BY-NC-4.0. Its training files
+contain only approved targets. The evaluation repository labels held-out
+records evaluation-only; never use them as training data.
+
+## 4. Create the two collections
+
+From your Hugging Face profile, create a public collection titled
+**Terminal-SLM models and adapters** and add:
+
+1. `CohereLabs/tiny-aya-global` (link only; do not re-upload its weights)
+2. `devjuneja789/terminal-slm-tiny-aya-joint-300-v1`
+3. `devjuneja789/terminal-slm-tiny-aya-task-start-620-v1`
+
+Create a second public collection titled **Terminal-SLM data and evaluation**
+and add the two dataset repositories above. Copy the generated collection URLs
+into the hackathon form; collection URLs include Hub-generated identifiers, so
+do not guess them.
+
+## 5. Publish the article and verify
+
+Open <https://huggingface.co/new-blog>, paste `submission/HF-ARTICLE.md`, and
+replace its three URL placeholders with the actual public GitHub and collection
+links. Publish only after those links work in a logged-out/private browser.
+The account must be eligible to publish a personal Hub article; if the editor
+blocks publication, use the account eligibility guidance in the Hub docs or
+ask the hackathon organizers what alternative article URL they accept.
+
+The final form needs four real URLs: model collection, dataset collection,
+published article, and GitHub repository. Do not submit placeholders or links to
+private repositories.

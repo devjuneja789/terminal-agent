@@ -107,6 +107,13 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for inspection commands and compatibility n
 - `research/results/` — actual run outputs; raw GPU job console logs are excluded by `.gitignore`.
 - `submission/` — results, reproduction instructions, trace review, and a recorded demo.
 
+## Licensing
+
+Project source code and tests use the MIT License. The curated support data,
+evaluation traces, and Tiny Aya adapters use CC-BY-NC-4.0 and remain subject to
+Cohere Labs' acceptable-use policy. See [LICENSES.md](LICENSES.md); the base
+model weights are not redistributed.
+
 ## Limitations
 
 The benchmark is small, shares one synthetic mini-application, and uses narrow

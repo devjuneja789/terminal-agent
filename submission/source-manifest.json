@@ -17,9 +17,17 @@
       "sha256": "81e074b1c6685db106848d933cc64545542212f648df25e0d965c12bcbff1dac",
       "bytes": 19522
     },
+    "LICENSE": {
+      "sha256": "7b1f61f9c4b30f0728c5b2ef2b88c9d4d0b5f1e4db8f44c54afdc5909aa95277",
+      "bytes": 1069
+    },
+    "LICENSES.md": {
+      "sha256": "ec57fe1ad1843639d5e547398294fde687faad6575da3699aa86203e4677cfaa",
+      "bytes": 650
+    },
     "README.md": {
-      "sha256": "049dd62215c2bf858f0b0082da5a419eedba3cb9fbcbe8922dfbecd5d39b43ab",
-      "bytes": 6426
+      "sha256": "1d98b114382f0c314b6f4633098192d039e68ecbb8571e638c06e9987c5acf84",
+      "bytes": 6712
     },
     "requirements-audit.txt": {
       "sha256": "f3b106519a89af18c5aad2693b0f0c7146388adfff865e60d2e226c051dd354e",
@@ -1385,13 +1393,21 @@
       "sha256": "b3394c0b1d1805aa42e3463c4d0427f4eb82288435fb2c8c1586064b2dfb6ab6",
       "bytes": 2797
     },
+    "submission/HF-ARTICLE.md": {
+      "sha256": "4ad9ea8d12646f11d51744819c67bd0386a2dab463ffabbe26b9ea2f374961b8",
+      "bytes": 2983
+    },
+    "submission/HF-PUBLISH-STEPS.md": {
+      "sha256": "5917a4dc98e2ad15275eb34da39a7aa8497887aab1c2840a5b4e7cfb78e1140f",
+      "bytes": 3768
+    },
     "submission/release-manifest.json": {
       "sha256": "cf26606da6113921bf62d4e0563799dae063bd27fecf45520ffeffe82a17eda7",
       "bytes": 241
     },
     "submission/RELEASE-REVIEW.md": {
-      "sha256": "f5ab07f367ec6b092d08baecf5b7177a49f6a64168c16605675406a621326f5c",
-      "bytes": 2571
+      "sha256": "47f75716631b625c0689c242b0ffaf752354852a7fe2a283cceb2717427c9533",
+      "bytes": 2945
     },
     "submission/REPRODUCING.md": {
       "sha256": "7e982125451a1ed05eda20e134b81136563be6481073b4b37a0ba5d0434dc16f",
