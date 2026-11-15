@@ -28,7 +28,7 @@ not guarantee completion of a full task.
 
 Read the [full results](submission/RESULTS.md), [trace review](submission/TRACE-REVIEW.md),
 and [EXP-027 report](research/experiments/EXP-027-task-start-curriculum-plan.md).
-The [recorded walkthrough](submission/demo.html) shows actual saved runs.
+The [recorded walkthrough](https://terminal-agent-l6b4.onrender.com) shows actual saved runs.
 
 ## How it works
 
@@ -63,8 +63,8 @@ Held-out tasks and evaluation trajectories were excluded from training.
 - [Reproduction guide](submission/REPRODUCING.md) — dependencies, pinned settings, and cloud commands.
 - [Benchmark documentation](evals/benchmark/README.md) — tasks, validation, metrics, and split rules.
 - [Development notes](DEVELOPMENT.md) — local environment and compatibility details.
-- [Models and adapters](https://huggingface.co/collections/devjuneja789/terminal-slm-models-and-adapters) — Hugging Face collection.
-- [Data and evaluation evidence](https://huggingface.co/collections/devjuneja789/terminal-slm-data-and-evaluation) — Hugging Face collection.
+- [Models and adapters](https://huggingface.co/collections/devjuneja789/terminal-slm-models-and-adapters) — the Tiny Aya base model, the evaluated LoRA adapter, and the later EXP-027 adapter (support tasks only).
+- [Data and evaluation evidence](https://huggingface.co/collections/devjuneja789/terminal-slm-data-and-evaluation) — approved support targets, fixed benchmark tasks, recorded trajectories, validation outputs, and audit reports.
 
 Run the core tests with Python 3.12; model packages and a GPU are not required:
 
