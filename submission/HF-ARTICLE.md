@@ -24,9 +24,9 @@ This negative result is useful: it separates conditional action learning from fu
 
 ## Artifacts
 
-- Code: [GITHUB_REPOSITORY_URL]
-- Models and adapters: [HF_MODEL_COLLECTION_URL]
-- Datasets and evaluation traces: [HF_DATASET_COLLECTION_URL]
-- Results and reproduction notes: [GITHUB_REPOSITORY_URL]/tree/main/submission
+- Code: https://github.com/devjuneja789/terminal-agent
+- Models and adapters: https://huggingface.co/collections/devjuneja789/terminal-slm-models-and-adapters
+- Datasets and evaluation traces: https://huggingface.co/collections/devjuneja789/terminal-slm-data-and-evaluation
+- Results and reproduction notes: https://github.com/devjuneja789/terminal-agent/tree/main/submission
 
 The model collection should link to the pinned base model and versioned adapters; it must not rehost the gated base weights. Dataset entries should label held-out records as evaluation-only. Tiny Aya is licensed CC-BY-NC-4.0 and requires following Cohere Labs' acceptable-use policy. Replace the placeholders only after the repositories and collections are public.

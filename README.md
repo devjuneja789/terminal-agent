@@ -1,82 +1,79 @@
 # Terminal-SLM
 
-**Track 3: Agentic Fine-tuning.** Terminal-SLM studies whether reviewed
-supervised demonstrations can improve a small model's reliability when using
-workspace-scoped terminal tools on executable coding tasks.
+**Can a small language model learn to use terminal tools reliably?**
 
-## Current result
+Terminal-SLM explores this question by training **CohereLabs Tiny Aya Global**
+on reviewed examples of repository tasks. An agent reads files, searches code,
+runs tests, and makes edits in a temporary workspace. Executable checks verify
+whether it actually completed the task.
 
-The frozen, matched held-out evaluation compared the untouched
-`CohereLabs/tiny-aya-global` model with a support-selected adapter. The base
-passed 1/10 benchmark contracts and the adapter passed 2/10. Neither completed
-a code-repair task (0/5 each), and trace review found the adapter's additional
-pass contained an inaccurate explanation. We do **not** claim reliable
-end-to-end improvement.
+Built for **Track 3: Agentic Fine-tuning**, using **AgentTune** for training and
+agent execution, and **AuditKIT** for auditing saved trajectories. All model
+training and inference ran on Hugging Face GPUs.
 
-A later, separate support-only task-start experiment passed 2/4 tasks with its
-adapter versus 0/4 with the base. Two file edits were independently checked
-against reviewed references and tests; two tasks still failed. This is
-exploratory support evidence, not held-out performance, and that adapter was
-not evaluated on the held-out set. See [EXP-027](research/experiments/EXP-027-task-start-curriculum-plan.md).
+## Results
 
-See the [matched evaluation](submission/RESULTS.md), [trace review](submission/TRACE-REVIEW.md),
-[reproduction guide](submission/REPRODUCING.md), and [recorded walkthrough](submission/demo.html).
+The project demonstrates a working training and evaluation pipeline, with
+limited task success. The two experiments below use different adapters and
+must be interpreted separately.
 
-## Research question and method
+| Experiment | Untouched base | Trained adapter | What the result means |
+|---|---:|---:|---|
+| Matched held-out evaluation (EXP-025) | 1/10 | 2/10 | Benchmark contract passes. The extra adapter pass contained an inaccurate explanation; both models completed 0/5 code repairs. |
+| Later replay on known support tasks (EXP-027) | 0/4 | 2/4 | Two successful edits matched reviewed references and passed tests. This adapter was not evaluated on held-out tasks. |
 
-Does AgentTune supervised post-training on reviewed terminal-use demonstrations
-improve Tiny Aya Global's executable task success and tool-call reliability
-compared with the untouched model under a fixed evaluation procedure?
+**These results do not establish reliable autonomous coding or improvement on
+unseen repositories.** They show that learning individual tool actions does
+not guarantee completion of a full task.
 
-The active experiment path is:
+Read the [full results](submission/RESULTS.md), [trace review](submission/TRACE-REVIEW.md),
+and [EXP-027 report](research/experiments/EXP-027-task-start-curriculum-plan.md).
+The [recorded walkthrough](submission/demo.html) shows actual saved runs.
+
+## How it works
 
 ```text
-CohereLabs/tiny-aya-global
-    → AgentTune Cohere-action terminal loop
-    → fixed 50-task repository benchmark (40 support / 10 held-out)
-    → matched base evaluation
-    → reviewed support-only QLoRA SFT
-    → frozen adapter evaluation + AuditKIT trace audit
+User task → Tiny Aya / AgentTune → tool action → isolated workspace
+                    ↑                               ↓
+                    └──────── tool observation ─────┘
+                                  ↓
+                        final answer + task validation
+                                  ↓
+                        saved trajectory + AuditKIT audit
 ```
 
-Inference and training run on Hugging Face GPU Jobs. The local machine is used
-for repository work and CPU-only checks. The project does not use held-out task
-records, outcomes, or rewards as training data. DPO, GRPO, GGUF conversion, and
-local model deployment were not part of this submission.
+The agent has five tools: `shell`, `read_file`, `write_file`, `grep`, and `git`.
+Tools check file paths, limit execution time and output size, filter environment
+variables, and log commands. These are application guardrails; arbitrary shell
+commands still require a container or VM for security isolation.
 
-## Architecture
+The benchmark contains **50 deterministic tasks** across navigation, code and
+configuration discovery, bug fixes, test fixes, and failure explanation. Its
+split was fixed before training: **40 support tasks and 10 held-out tasks**.
+Tasks share a small synthetic repository, so this split does not measure
+transfer across unrelated repositories.
 
-The cloud evaluation runner uses AgentTune for the model/action loop and
-trajectory capture. Terminal-SLM supplies isolated repository snapshots,
-five workspace-scoped tools (`shell`, `read_file`, `write_file`, `grep`, `git`),
-executable task validators, frozen split definitions, and audit scripts. The
-complete trajectories are checked by independent harness metrics and AuditKIT.
+Training used reviewed support demonstrations with **QLoRA supervised
+fine-tuning**. The selected held-out adapter used 15 corrective action targets;
+the later support experiment used 31 approved targets including task starts.
+Held-out tasks and evaluation trajectories were excluded from training.
 
-The repository also contains the earlier standalone tool harness and CLI in
-`agent/`, `tools/`, `model/`, and `cli.py`. The current reported cloud
-experiments use `training/agenttune/`; the standalone local Transformers path
-is not used to produce the reported results.
+## Start here
 
-## Experiment plan
+- [Reproduction guide](submission/REPRODUCING.md) — dependencies, pinned settings, and cloud commands.
+- [Benchmark documentation](evals/benchmark/README.md) — tasks, validation, metrics, and split rules.
+- [Development notes](DEVELOPMENT.md) — local environment and compatibility details.
+- [Models and adapters](https://huggingface.co/collections/devjuneja789/terminal-slm-models-and-adapters) — Hugging Face collection.
+- [Data and evaluation evidence](https://huggingface.co/collections/devjuneja789/terminal-slm-data-and-evaluation) — Hugging Face collection.
 
-- **A — Agent/tool harness:** workspace-scoped tools, bounded loop, trajectory capture, and CLI implemented. Cloud experiments use the AgentTune Cohere-action integration.
-- **B — Executable benchmark:** 50 deterministic repository tasks; fixed 40-task support and 10-task held-out split.
-- **C — Baseline:** untouched Tiny Aya scored 0/10 on the frozen held-out benchmark.
-- **D — Supervised fine-tuning:** adapter training, label/gradient/update/reload checks, paired held-out evaluation, and a later support-only task-start diagnostic completed. Results and limitations are documented; no reliable repair gain was established.
-- **E — DPO:** not run; no need established for this submission.
-- **F — GRPO:** not run; deferred.
-- **G — Quantized local deployment:** not run; deferred. The chosen inference path is cloud GPU evaluation.
-
-## Reproduce and inspect
-
-Core repository checks need Python's standard library:
+Run the core tests with Python 3.12; model packages and a GPU are not required:
 
 ```sh
 python3 -m unittest discover -v
 ```
 
-To independently inspect the completed held-out records with AuditKIT, install
-the audit dependencies from `requirements-audit.txt`, then run:
+For the optional AuditKIT audit, install the dependencies in
+`requirements-audit.txt`, then evaluate the saved records:
 
 ```sh
 python3 -m evals.auditkit_report \
@@ -84,41 +81,30 @@ python3 -m evals.auditkit_report \
   --output-prefix submission/auditkit/final
 ```
 
-This audits saved episodes and does not run model inference. Cloud job launchers
-in `scripts/` require Hugging Face access, credentials supplied securely to the
-job, and billable GPU resources. Review their configs and the reproduction guide
-before launching jobs.
+This command audits existing episodes. Reproducing model training or inference
+requires Hugging Face access and paid GPU resources; follow the reproduction
+guide before launching a job. The reported experiments used a Tesla T4 with
+16 GiB VRAM. Local CUDA inference is not required.
 
-## Hardware and availability
+## Repository layout
 
-- **Local development host:** WSL2 Ubuntu, Python 3.12.3, about 7.7 GiB RAM, and a workspace filesystem with about 261 GiB free at the latest check. The host GPU is a GTX 1060 Max-Q with 6 GiB VRAM, but NVML access is blocked from the current environment. PyTorch and the model-training packages are not installed locally; local CUDA inference was not attempted.
-- **Cloud experiments:** Hugging Face GPU Jobs. The matched held-out run used a Tesla T4 (16 GiB); the recorded job environment used Python 3.12.16, PyTorch 2.11.0+cu130, Transformers 5.22.1, AgentTune 1.1.3, and Accelerate 1.15.0. Training and inference configuration are recorded with each run.
-- **Model:** Tiny Aya Global, pinned to revision `af89d219b53ed9b13b8a4645f9c8028973510324` in the reported experiments.
+| Path | Contents |
+|---|---|
+| `tools/`, `agent/`, `model/`, `cli.py` | Workspace tools and the standalone agent harness |
+| `training/agenttune/` | Active cloud training and agent integration |
+| `evals/benchmark/` | Fixed task definitions, repository snapshot, and validators |
+| `data/` | Support demonstrations, reviews, and training admission records |
+| `configs/`, `scripts/` | Experiment settings and launch, extraction, and audit utilities |
+| `research/experiments/`, `research/results/` | Experiment notes and actual outputs |
+| `submission/` | Results, reproduction guide, article, and recorded walkthrough |
 
-See [DEVELOPMENT.md](DEVELOPMENT.md) for inspection commands and compatibility notes.
-
-## Repository map
-
-- `agent/`, `tools/`, `model/`, `cli.py` — standalone workspace tool harness and CLI.
-- `evals/benchmark/` — task contracts, snapshots, fixed split, and evaluator.
-- `training/agenttune/`, `configs/`, `scripts/` — cloud training/evaluation integration and reproducible launch/extraction utilities.
-- `data/` — reviewed support examples, admission decisions, and provenance.
-- `research/experiments/` — protocols, results, failure analysis, and design decisions.
-- `research/results/` — actual run outputs; raw GPU job console logs are excluded by `.gitignore`.
-- `submission/` — results, reproduction instructions, trace review, and a recorded demo.
+The reported runs use the AgentTune cloud integration. The standalone local
+CLI is retained as development code. DPO, GRPO, GGUF conversion, and local model
+deployment were not included in this submission.
 
 ## Licensing
 
-Project source code and tests use the MIT License. The curated support data,
-evaluation traces, and Tiny Aya adapters use CC-BY-NC-4.0 and remain subject to
-Cohere Labs' acceptable-use policy. See [LICENSES.md](LICENSES.md); the base
-model weights are not redistributed.
-
-## Limitations
-
-The benchmark is small, shares one synthetic mini-application, and uses narrow
-validators. Task-level separation is not repository-level separation. Contract
-scores do not guarantee factual answer quality; the trace review documents a
-counterexample. Support results are from known tasks and are not generalization
-evidence. The shell layer is a workspace-scoped guardrail, not an OS security
-sandbox. No production safety or autonomous coding guarantee is claimed.
+Source code and tests use the [MIT License](LICENSE). Curated data, evaluation
+traces, and Tiny Aya adapters use CC-BY-NC-4.0 and remain subject to Cohere Labs'
+acceptable-use policy. See [license scope](LICENSES.md). Base-model weights are
+not redistributed.

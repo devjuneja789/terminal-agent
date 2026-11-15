@@ -13,10 +13,6 @@
       "sha256": "ff3b7dc854d6afa4213af2ff2c60806bcd840f7ccc0b19890fec7995318edb2c",
       "bytes": 4534
     },
-    "implementation_plan_claude.md": {
-      "sha256": "81e074b1c6685db106848d933cc64545542212f648df25e0d965c12bcbff1dac",
-      "bytes": 19522
-    },
     "LICENSE": {
       "sha256": "7b1f61f9c4b30f0728c5b2ef2b88c9d4d0b5f1e4db8f44c54afdc5909aa95277",
       "bytes": 1069
@@ -26,8 +22,8 @@
       "bytes": 650
     },
     "README.md": {
-      "sha256": "1d98b114382f0c314b6f4633098192d039e68ecbb8571e638c06e9987c5acf84",
-      "bytes": 6712
+      "sha256": "08bfaaa08557caf8bad5f6d572d862a7a780cd7da2cbd55d89ee533df6bb18a9",
+      "bytes": 5463
     },
     "requirements-audit.txt": {
       "sha256": "f3b106519a89af18c5aad2693b0f0c7146388adfff865e60d2e226c051dd354e",
@@ -312,10 +308,6 @@
     "research/IMPLEMENTATION-STATUS.md": {
       "sha256": "30dbc22bb741e085897a59d8fd17f61d862a807ec94d632309bebce6b4913cca",
       "bytes": 4980
-    },
-    "research/SUBMISSION-DAY-PLAN.md": {
-      "sha256": "5f65cb906f473977fcacd3a13f5308df3741fdd3af7c51dfb513a1359ec4238f",
-      "bytes": 5123
     },
     "research/experiments/EXP-002-tiny-aya-phase1-smoke.md": {
       "sha256": "2b5c36abe3f6587f12c7e1aa40054d7efa0243b4fc97933e3af4773d96e1a685",
@@ -1394,8 +1386,8 @@
       "bytes": 2797
     },
     "submission/HF-ARTICLE.md": {
-      "sha256": "4ad9ea8d12646f11d51744819c67bd0386a2dab463ffabbe26b9ea2f374961b8",
-      "bytes": 2983
+      "sha256": "d1e184f3094812f41d0f252aa47caaa6c468b4cb52e95da6b93aeb03b4cc23e0",
+      "bytes": 3137
     },
     "submission/HF-PUBLISH-STEPS.md": {
       "sha256": "84ec3023cd0e6d90a63175f2db8069841d51e275e365ff73d59d7c4cb7543da1",
