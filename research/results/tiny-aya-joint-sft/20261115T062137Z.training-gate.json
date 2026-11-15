@@ -1,0 +1,12 @@
+{
+  "run_id": "20261115T062137Z",
+  "result_sha256": "aad95ce197daa8381056b8f533d8a33518f3dc2f87f384b39087b473db79cd3d",
+  "all_joint_coefficients_and_gradient_checks_passed": true,
+  "updates": 60,
+  "epochs": 4,
+  "skipped_updates": [],
+  "all_completion_tokens_positive_loss": true,
+  "source_rows_sha256": "03fc46a5cbfa41482ffbfda57ff8188bbfc761df998cc01a7f6e5bf0b803bb3b",
+  "artifact_commit": "36f7fecf593e523ca18b910d635465533a9a0e41",
+  "heldout_accessed": false
+}

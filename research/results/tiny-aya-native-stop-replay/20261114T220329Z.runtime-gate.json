@@ -1,0 +1,31 @@
+{
+  "run_id": "20261114T220329Z",
+  "config_id": "terminal-slm-native-stops-support-replay-v1",
+  "config_sha256": "bc31e9de5ac85c7867873b75a964693f6f28cb8fc93ba4b983bd72297a4d50d8",
+  "runtime_stop_gate_passed": true,
+  "stop_ids": [
+    3,
+    6,
+    261001
+  ],
+  "heldout_accessed": false,
+  "training_performed": false,
+  "training_admission_performed": false,
+  "analysis_path": "research/results/tiny-aya-native-stop-replay/20261114T220329Z.analysis.json",
+  "analysis_sha256": "279941ea5562758636251a6a84afd82e2116eb0144e969bdacc34c5f8d693b96",
+  "hf_job_id": "6af8da4a23985fb9cd829cf3",
+  "log_sha256": "45c4fd05dd455dc1aa65b0d882a25411e4d1f656bb58e053d9701f0065461b1d",
+  "recovered_log_sha256": "8fc325849a860e5695ddabfac3c1e731380f0a15a39c5e0c985c132be6d2c3f1",
+  "artifacts_sha256": {
+    ".jsonl": "65df0e11283fb5464669673db5adb610b781651f4da41ae7aa158b68dd8e9a63",
+    ".metadata.json": "67168d61bcb10170115a355dec8dcbe9d0f2149c05690f521b189d61167f890f",
+    ".summary.json": "52cc6df2ea3ec0437cce99b43c118e7efee2e1b263b1ed0c967df738545cb921"
+  },
+  "source_sha256": {
+    "training/agenttune/paired_replay.py": "d2b5b23454fffb492bd187dbd8d10040162dad64a40b6a13794557e8eb467a82",
+    "training/agenttune/prepare_native_stop_replay.py": "612e1551b3d48c3c3ad7a93d715f4cd8fe0c688c0b84390f4a70f1f20af94db9",
+    "training/agenttune/hf_gpu_smoke.py": "bb0947936a2b994d5b2b7b4c72da1d3b7b990b2ddaefe0dafd9af7dc85e18ec9",
+    "training/agenttune/evaluate_heldout.py": "88d5da79e4aed5c8bace6c75b45bdcc032492a6f2bdfe065d1a4c1491cc0dd00",
+    "scripts/analyze_native_stop_replay.py": "612af37da3b54f4f3eafcaf9a20b0365dd86bcccfaafb7bf4f78de4e64759a9e"
+  }
+}

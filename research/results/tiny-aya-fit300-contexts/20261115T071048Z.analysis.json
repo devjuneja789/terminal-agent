@@ -1,0 +1,1135 @@
+{
+  "run_id": "20261115T071048Z",
+  "config_sha256": "fe2b93da475580242472e09d9747ead5ba4b1598e147eae4ea0775e766b3aa55",
+  "all_lineage_token_action_and_stop_checks_passed": true,
+  "metrics": {
+    "base": {
+      "prediction_count": 15,
+      "schema_valid": 15,
+      "tool_name_matches": 1,
+      "exact_action_matches": 1,
+      "teacher_forced_exact": 0,
+      "mean_action_token_accuracy": 0.8668623883601069,
+      "mean_action_nll": 0.8105729907751084,
+      "generated_tokens": 529,
+      "cap_hits": 0,
+      "by_expected_tool": {
+        "finish": {
+          "count": 4,
+          "tool_name_matches": 0,
+          "exact_action_matches": 0,
+          "schema_valid": 4
+        },
+        "read_file": {
+          "count": 2,
+          "tool_name_matches": 0,
+          "exact_action_matches": 0,
+          "schema_valid": 2
+        },
+        "shell": {
+          "count": 6,
+          "tool_name_matches": 1,
+          "exact_action_matches": 1,
+          "schema_valid": 6
+        },
+        "write_file": {
+          "count": 3,
+          "tool_name_matches": 0,
+          "exact_action_matches": 0,
+          "schema_valid": 3
+        }
+      }
+    },
+    "adapter": {
+      "prediction_count": 15,
+      "schema_valid": 15,
+      "tool_name_matches": 15,
+      "exact_action_matches": 6,
+      "teacher_forced_exact": 6,
+      "mean_action_token_accuracy": 0.9375680511445099,
+      "mean_action_nll": 0.28294726784030594,
+      "generated_tokens": 1053,
+      "cap_hits": 0,
+      "by_expected_tool": {
+        "finish": {
+          "count": 4,
+          "tool_name_matches": 4,
+          "exact_action_matches": 0,
+          "schema_valid": 4
+        },
+        "read_file": {
+          "count": 2,
+          "tool_name_matches": 2,
+          "exact_action_matches": 0,
+          "schema_valid": 2
+        },
+        "shell": {
+          "count": 6,
+          "tool_name_matches": 6,
+          "exact_action_matches": 4,
+          "schema_valid": 6
+        },
+        "write_file": {
+          "count": 3,
+          "tool_name_matches": 3,
+          "exact_action_matches": 2,
+          "schema_valid": 3
+        }
+      }
+    }
+  },
+  "per_action": [
+    {
+      "arm": "adapter",
+      "action_index": 0,
+      "task_id": "B021",
+      "expected_tool": "read_file",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": true,
+        "exact_action_match": false,
+        "expected_tool": "read_file",
+        "selected_tool": "read_file"
+      },
+      "generated_text": "[{\"tool_name\": \"read_file\", \"parameters\": {\"path\": \"shop/config.py\", \"start_line\": 1, \"end_line\": 4}}]",
+      "teacher_token_accuracy": 0.972972972972973,
+      "teacher_mean_nll": 0.11390583217144012,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "base",
+      "action_index": 0,
+      "task_id": "B021",
+      "expected_tool": "read_file",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": false,
+        "exact_action_match": false,
+        "expected_tool": "read_file",
+        "selected_tool": "shell"
+      },
+      "generated_text": "[{\"tool_name\": \"shell\", \"parameters\": {\"command\": \"python3 -m unittest tests.test_contracts.Contracts.test_page_size_lower_bound\", \"timeout\": 30}}]",
+      "teacher_token_accuracy": 0.918918918918919,
+      "teacher_mean_nll": 0.6930755972862244,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 2,
+          "top1_correct": 1,
+          "exact": false
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "adapter",
+      "action_index": 1,
+      "task_id": "B021",
+      "expected_tool": "write_file",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": true,
+        "exact_action_match": true,
+        "expected_tool": "write_file",
+        "selected_tool": "write_file",
+        "write_path_match": true,
+        "write_content_exact": true,
+        "write_syntax_valid": true,
+        "defined_functions": [
+          "page_size",
+          "request_timeout"
+        ]
+      },
+      "generated_text": "[{\"tool_name\": \"write_file\", \"parameters\": {\"path\": \"shop/config.py\", \"content\": \"\\\"\\\"\\\"Application configuration.\\\"\\\"\\\"\\n\\nimport os\\n\\n\\nDEFAULT_TIMEOUT_SECONDS = 10\\nMAX_PAGE_SIZE = 100\\nREQUEST_TIMEOUT_ENV = \\\"REQUEST_TIMEOUT_SECONDS\\\"\\n\\n\\ndef request_timeout() -> int:\\n    \\\"\\\"\\\"Read the request timeout, falling back to the documented default.\\\"\\\"\\\"\\n    return DEFAULT_TIMEOUT_SECONDS\\n\\n\\ndef page_size(value: int) -> int:\\n    \\\"\\\"\\\"Clamp a page size to the configured range.\\\"\\\"\\\"\\n    return max(1, min(value, MAX_PAGE_SIZE))\\n\"}}]",
+      "teacher_token_accuracy": 1.0,
+      "teacher_mean_nll": 0.00925939716398716,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        },
+        "changed_code": {
+          "tokens": 6,
+          "top1_correct": 6,
+          "exact": true
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "base",
+      "action_index": 1,
+      "task_id": "B021",
+      "expected_tool": "write_file",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": false,
+        "exact_action_match": false,
+        "expected_tool": "write_file",
+        "selected_tool": "read_file"
+      },
+      "generated_text": "[{\"tool_name\": \"read_file\", \"parameters\": {\"path\": \"shop/config.py\", \"start_line\": 1, \"end_line\": 30}}]",
+      "teacher_token_accuracy": 0.949685534591195,
+      "teacher_mean_nll": 0.2548806965351105,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 2,
+          "top1_correct": 1,
+          "exact": false
+        },
+        "changed_code": {
+          "tokens": 6,
+          "top1_correct": 2,
+          "exact": false
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 1,
+          "exact": false
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "adapter",
+      "action_index": 2,
+      "task_id": "B021",
+      "expected_tool": "shell",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": true,
+        "exact_action_match": true,
+        "expected_tool": "shell",
+        "selected_tool": "shell"
+      },
+      "generated_text": "[{\"tool_name\": \"shell\", \"parameters\": {\"command\": \"python3 -m unittest tests.test_contracts.Contracts.test_page_size_lower_bound\", \"timeout\": 30}}]",
+      "teacher_token_accuracy": 1.0,
+      "teacher_mean_nll": 0.0064129396341741085,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 1,
+          "top1_correct": 1,
+          "exact": true
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "base",
+      "action_index": 2,
+      "task_id": "B021",
+      "expected_tool": "shell",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": false,
+        "exact_action_match": false,
+        "expected_tool": "shell",
+        "selected_tool": "finish"
+      },
+      "generated_text": "[{\"tool_name\": \"finish\", \"parameters\": {\"answer\": \"The page_size() function now correctly returns 1 when the input is zero.\"}}]",
+      "teacher_token_accuracy": 0.9545454545454546,
+      "teacher_mean_nll": 0.31187009811401367,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 1,
+          "top1_correct": 0,
+          "exact": false
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "adapter",
+      "action_index": 3,
+      "task_id": "B021",
+      "expected_tool": "shell",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": true,
+        "exact_action_match": true,
+        "expected_tool": "shell",
+        "selected_tool": "shell"
+      },
+      "generated_text": "[{\"tool_name\": \"shell\", \"parameters\": {\"command\": \"python3 -m unittest tests.test_contracts.Contracts.test_page_size_upper_bound\", \"timeout\": 30}}]",
+      "teacher_token_accuracy": 1.0,
+      "teacher_mean_nll": 0.012509736232459545,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 1,
+          "top1_correct": 1,
+          "exact": true
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "base",
+      "action_index": 3,
+      "task_id": "B021",
+      "expected_tool": "shell",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": false,
+        "exact_action_match": false,
+        "expected_tool": "shell",
+        "selected_tool": "finish"
+      },
+      "generated_text": "[{\"tool_name\": \"finish\", \"parameters\": {\"answer\": \"Test passed.\"}}]",
+      "teacher_token_accuracy": 0.9318181818181818,
+      "teacher_mean_nll": 0.4109124541282654,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 1,
+          "top1_correct": 0,
+          "exact": false
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "adapter",
+      "action_index": 4,
+      "task_id": "B021",
+      "expected_tool": "finish",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": true,
+        "exact_action_match": false,
+        "expected_tool": "finish",
+        "selected_tool": "finish"
+      },
+      "generated_text": "[{\"tool_name\": \"finish\", \"parameters\": {\"answer\": \"Changed page_size() to return max(1, min(value, MAX_PAGE_SIZE)) in shop/config.py. Passes both lower and upper bound tests.\"}}]",
+      "teacher_token_accuracy": 0.7959183673469388,
+      "teacher_mean_nll": 0.9918999075889587,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "base",
+      "action_index": 4,
+      "task_id": "B021",
+      "expected_tool": "finish",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": false,
+        "exact_action_match": false,
+        "expected_tool": "finish",
+        "selected_tool": "shell"
+      },
+      "generated_text": "[{\"tool_name\": \"shell\", \"parameters\": {\"command\": \"python3 -m unittest tests.test_contracts.Contracts.test_page_size_upper_bound\", \"timeout\": 30}}]",
+      "teacher_token_accuracy": 0.673469387755102,
+      "teacher_mean_nll": 2.126561403274536,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 2,
+          "top1_correct": 1,
+          "exact": false
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "adapter",
+      "action_index": 5,
+      "task_id": "B026",
+      "expected_tool": "write_file",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": true,
+        "exact_action_match": false,
+        "expected_tool": "write_file",
+        "selected_tool": "write_file",
+        "write_path_match": true,
+        "write_content_exact": false,
+        "write_syntax_valid": true,
+        "defined_functions": [
+          "page_size",
+          "request_timeout"
+        ]
+      },
+      "generated_text": "[{\"tool_name\": \"write_file\", \"parameters\": {\"path\": \"shop/config.py\", \"content\": \"\\\"\\\"\\\"Application configuration.\\\"\\\"\\\"\\n\\nimport os\\n\\n\\nDEFAULT_TIMEOUT_SECONDS = 10\\nMAX_PAGE_SIZE = 100\\nREQUEST_TIMEOUT_ENV = \\\"REQUEST_TIMEOUT_SECONDS\\\"\\n\\n\\ndef request_timeout() -> int:\\n    \\\"\\\"\\\"Read the request timeout from the environment variable REQUEST_TIMEOUT_SECONDS, falling back to the documented default.\\\"\\\"\\\"\\n    value = os.getenv(REQUEST_TIMEOUT_ENV)\\n    return page_size(value if value is not None else DEFAULT_TIMEOUT_SECONDS)\\n\\n\\ndef page_size(value: int) -> int:\\n    \\\"\\\"\\\"Clamp a page size to the configured range.\\\"\\\"\\\"\\n    return min(value, MAX_PAGE_SIZE)\\n\"}}]",
+      "teacher_token_accuracy": 0.9940476190476191,
+      "teacher_mean_nll": 0.028768733143806458,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        },
+        "changed_code": {
+          "tokens": 14,
+          "top1_correct": 14,
+          "exact": true
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "base",
+      "action_index": 5,
+      "task_id": "B026",
+      "expected_tool": "write_file",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": false,
+        "exact_action_match": false,
+        "expected_tool": "write_file",
+        "selected_tool": "shell"
+      },
+      "generated_text": "[{\"tool_name\": \"shell\", \"parameters\": {\"command\": \"git config -f shop/config.py REQUEST_TIMEOUT_SECONDS\", \"timeout\": 30}}]",
+      "teacher_token_accuracy": 0.9702380952380952,
+      "teacher_mean_nll": 0.2231043428182602,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 2,
+          "top1_correct": 1,
+          "exact": false
+        },
+        "changed_code": {
+          "tokens": 14,
+          "top1_correct": 13,
+          "exact": false
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 1,
+          "exact": false
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "adapter",
+      "action_index": 6,
+      "task_id": "B026",
+      "expected_tool": "shell",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": true,
+        "exact_action_match": true,
+        "expected_tool": "shell",
+        "selected_tool": "shell"
+      },
+      "generated_text": "[{\"tool_name\": \"shell\", \"parameters\": {\"command\": \"python3 -m unittest tests.test_contracts.Contracts.test_timeout_from_environment\", \"timeout\": 30}}]",
+      "teacher_token_accuracy": 1.0,
+      "teacher_mean_nll": 0.005920706782490015,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 1,
+          "top1_correct": 1,
+          "exact": true
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "base",
+      "action_index": 6,
+      "task_id": "B026",
+      "expected_tool": "shell",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": true,
+        "exact_action_match": true,
+        "expected_tool": "shell",
+        "selected_tool": "shell"
+      },
+      "generated_text": "[{\"tool_name\": \"shell\", \"parameters\": {\"command\": \"python3 -m unittest tests.test_contracts.Contracts.test_timeout_from_environment\", \"timeout\": 30}}]",
+      "teacher_token_accuracy": 0.9777777777777777,
+      "teacher_mean_nll": 0.2999430000782013,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 1,
+          "top1_correct": 1,
+          "exact": true
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "adapter",
+      "action_index": 7,
+      "task_id": "B026",
+      "expected_tool": "shell",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": true,
+        "exact_action_match": false,
+        "expected_tool": "shell",
+        "selected_tool": "shell"
+      },
+      "generated_text": "[{\"tool_name\": \"shell\", \"parameters\": {\"command\": \"python3 -m unittest tests.test_contracts.Contracts.test_page_size_limit\", \"timeout\": 30}}]",
+      "teacher_token_accuracy": 0.9772727272727273,
+      "teacher_mean_nll": 0.1491887867450714,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 1,
+          "top1_correct": 1,
+          "exact": true
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "base",
+      "action_index": 7,
+      "task_id": "B026",
+      "expected_tool": "shell",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": false,
+        "exact_action_match": false,
+        "expected_tool": "shell",
+        "selected_tool": "finish"
+      },
+      "generated_text": "[{\"tool_name\": \"finish\", \"parameters\": {\"answer\": \"Test passed.\"}}]",
+      "teacher_token_accuracy": 0.8863636363636364,
+      "teacher_mean_nll": 0.6567395925521851,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 1,
+          "top1_correct": 0,
+          "exact": false
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "adapter",
+      "action_index": 8,
+      "task_id": "B026",
+      "expected_tool": "finish",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": true,
+        "exact_action_match": false,
+        "expected_tool": "finish",
+        "selected_tool": "finish"
+      },
+      "generated_text": "[{\"tool_name\": \"finish\", \"parameters\": {\"answer\": \"The test passes after updating shop/config.py.\"}}]",
+      "teacher_token_accuracy": 0.8125,
+      "teacher_mean_nll": 0.9499319195747375,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "base",
+      "action_index": 8,
+      "task_id": "B026",
+      "expected_tool": "finish",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": false,
+        "exact_action_match": false,
+        "expected_tool": "finish",
+        "selected_tool": "shell"
+      },
+      "generated_text": "[{\"tool_name\": \"shell\", \"parameters\": {\"command\": \"python3 -m unittest tests.test_contracts.Contracts.test_page_size_upper_bound\", \"timeout\": 30}}]",
+      "teacher_token_accuracy": 0.671875,
+      "teacher_mean_nll": 1.9428465366363525,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 2,
+          "top1_correct": 1,
+          "exact": false
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "adapter",
+      "action_index": 9,
+      "task_id": "B041",
+      "expected_tool": "read_file",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": true,
+        "exact_action_match": false,
+        "expected_tool": "read_file",
+        "selected_tool": "read_file"
+      },
+      "generated_text": "[{\"tool_name\": \"read_file\", \"parameters\": {\"path\": \"shop/config.py\", \"start_line\": 1, \"end_line\": 2}}]",
+      "teacher_token_accuracy": 0.972972972972973,
+      "teacher_mean_nll": 0.11947569996118546,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "base",
+      "action_index": 9,
+      "task_id": "B041",
+      "expected_tool": "read_file",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": false,
+        "exact_action_match": false,
+        "expected_tool": "read_file",
+        "selected_tool": "shell"
+      },
+      "generated_text": "[{\"tool_name\": \"shell\", \"parameters\": {\"command\": \"python3 -m unittest tests.test_contracts.Contracts.test_timeout_default\", \"timeout\": 30}}]",
+      "teacher_token_accuracy": 0.8918918918918919,
+      "teacher_mean_nll": 0.671803891658783,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 2,
+          "top1_correct": 1,
+          "exact": false
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 1,
+          "exact": false
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "adapter",
+      "action_index": 10,
+      "task_id": "B041",
+      "expected_tool": "write_file",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": true,
+        "exact_action_match": true,
+        "expected_tool": "write_file",
+        "selected_tool": "write_file",
+        "write_path_match": true,
+        "write_content_exact": true,
+        "write_syntax_valid": true,
+        "defined_functions": [
+          "page_size",
+          "request_timeout"
+        ]
+      },
+      "generated_text": "[{\"tool_name\": \"write_file\", \"parameters\": {\"path\": \"shop/config.py\", \"content\": \"\\\"\\\"\\\"Application configuration.\\\"\\\"\\\"\\n\\nimport os\\n\\n\\nDEFAULT_TIMEOUT_SECONDS = 15\\nMAX_PAGE_SIZE = 100\\nREQUEST_TIMEOUT_ENV = \\\"REQUEST_TIMEOUT_SECONDS\\\"\\n\\n\\ndef request_timeout() -> int:\\n    \\\"\\\"\\\"Read the request timeout, falling back to the documented default.\\\"\\\"\\\"\\n    return DEFAULT_TIMEOUT_SECONDS\\n\\n\\ndef page_size(value: int) -> int:\\n    \\\"\\\"\\\"Clamp a page size to the configured range.\\\"\\\"\\\"\\n    return min(value, MAX_PAGE_SIZE)\\n\"}}]",
+      "teacher_token_accuracy": 1.0,
+      "teacher_mean_nll": 0.010267134755849838,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        },
+        "changed_code": {
+          "tokens": 1,
+          "top1_correct": 1,
+          "exact": true
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "base",
+      "action_index": 10,
+      "task_id": "B041",
+      "expected_tool": "write_file",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": false,
+        "exact_action_match": false,
+        "expected_tool": "write_file",
+        "selected_tool": "read_file"
+      },
+      "generated_text": "[{\"tool_name\": \"read_file\", \"parameters\": {\"path\": \"shop/config.py\", \"start_line\": 1, \"end_line\": 30}}]",
+      "teacher_token_accuracy": 0.967741935483871,
+      "teacher_mean_nll": 0.19538795948028564,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 2,
+          "top1_correct": 1,
+          "exact": false
+        },
+        "changed_code": {
+          "tokens": 1,
+          "top1_correct": 1,
+          "exact": true
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 1,
+          "exact": false
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "adapter",
+      "action_index": 11,
+      "task_id": "B041",
+      "expected_tool": "shell",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": true,
+        "exact_action_match": true,
+        "expected_tool": "shell",
+        "selected_tool": "shell"
+      },
+      "generated_text": "[{\"tool_name\": \"shell\", \"parameters\": {\"command\": \"python3 -m unittest tests.test_contracts.Contracts.test_timeout_default\", \"timeout\": 30}}]",
+      "teacher_token_accuracy": 1.0,
+      "teacher_mean_nll": 0.005223873071372509,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 1,
+          "top1_correct": 1,
+          "exact": true
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "base",
+      "action_index": 11,
+      "task_id": "B041",
+      "expected_tool": "shell",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": false,
+        "exact_action_match": false,
+        "expected_tool": "shell",
+        "selected_tool": "finish"
+      },
+      "generated_text": "[{\"tool_name\": \"finish\", \"parameters\": {\"answer\": \"Configuration file updated successfully.\"}}]",
+      "teacher_token_accuracy": 0.9534883720930233,
+      "teacher_mean_nll": 0.3033222258090973,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 1,
+          "top1_correct": 0,
+          "exact": false
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "adapter",
+      "action_index": 12,
+      "task_id": "B041",
+      "expected_tool": "shell",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": true,
+        "exact_action_match": false,
+        "expected_tool": "shell",
+        "selected_tool": "shell"
+      },
+      "generated_text": "[{\"tool_name\": \"shell\", \"parameters\": {\"command\": \"python3 -m unittest tests.test_contracts.Contracts.test_page_size\", \"timeout\": 30}}]",
+      "teacher_token_accuracy": 0.9772727272727273,
+      "teacher_mean_nll": 0.11559692770242691,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 1,
+          "top1_correct": 1,
+          "exact": true
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "base",
+      "action_index": 12,
+      "task_id": "B041",
+      "expected_tool": "shell",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": false,
+        "exact_action_match": false,
+        "expected_tool": "shell",
+        "selected_tool": "finish"
+      },
+      "generated_text": "[{\"tool_name\": \"finish\", \"parameters\": {\"answer\": \"Test passed.\"}}]",
+      "teacher_token_accuracy": 0.8863636363636364,
+      "teacher_mean_nll": 0.613584041595459,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 1,
+          "top1_correct": 0,
+          "exact": false
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "adapter",
+      "action_index": 13,
+      "task_id": "B041",
+      "expected_tool": "finish",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": true,
+        "exact_action_match": false,
+        "expected_tool": "finish",
+        "selected_tool": "finish"
+      },
+      "generated_text": "[{\"tool_name\": \"finish\", \"parameters\": {\"answer\": \"Updated DEFAULT_TIMEOUT_SECONDS to 15 in shop/config.py while preserving request_timeout() behavior. Ran the test and it passed.\"}}]",
+      "teacher_token_accuracy": 0.8,
+      "teacher_mean_nll": 0.8886207938194275,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "base",
+      "action_index": 13,
+      "task_id": "B041",
+      "expected_tool": "finish",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": false,
+        "exact_action_match": false,
+        "expected_tool": "finish",
+        "selected_tool": "shell"
+      },
+      "generated_text": "[{\"tool_name\": \"shell\", \"parameters\": {\"command\": \"python3 -m unittest tests.test_contracts.Contracts.test_page_size_upper_bound\", \"timeout\": 30}}]",
+      "teacher_token_accuracy": 0.6363636363636364,
+      "teacher_mean_nll": 1.898295521736145,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 2,
+          "top1_correct": 1,
+          "exact": false
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "adapter",
+      "action_index": 14,
+      "task_id": "B046",
+      "expected_tool": "finish",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": true,
+        "exact_action_match": false,
+        "expected_tool": "finish",
+        "selected_tool": "finish"
+      },
+      "generated_text": "[{\"tool_name\": \"finish\", \"parameters\": {\"answer\": \"The test failed because the configuration file did not define a value for REQUEST_TIMEOUT_SECONDS. The test called request_timeout() which returned DEFAULT_TIMEOUT_SECONDS (10) but the test expected 25. The test was looking for a value from the environment variable REQUEST_TIMEOUT_SECONDS, but the configuration file did not include that variable. The function page_size() was not relevant to the test failure.\"}}]",
+      "teacher_token_accuracy": 0.7605633802816901,
+      "teacher_mean_nll": 0.8372266292572021,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    },
+    {
+      "arm": "base",
+      "action_index": 14,
+      "task_id": "B046",
+      "expected_tool": "finish",
+      "comparison": {
+        "schema_valid": true,
+        "tool_name_match": false,
+        "exact_action_match": false,
+        "expected_tool": "finish",
+        "selected_tool": "shell"
+      },
+      "generated_text": "[{\"tool_name\": \"shell\", \"parameters\": {\"command\": \"grep -E 'REQUEST_TIMEOUT_SECONDS' shop/config.py\", \"timeout\": 30}}]",
+      "teacher_token_accuracy": 0.7323943661971831,
+      "teacher_mean_nll": 1.556267499923706,
+      "teacher_critical_scopes": {
+        "tool_name": {
+          "tokens": 2,
+          "top1_correct": 1,
+          "exact": false
+        },
+        "changed_code": {
+          "tokens": 0,
+          "top1_correct": 0,
+          "exact": null
+        },
+        "json_closure": {
+          "tokens": 2,
+          "top1_correct": 2,
+          "exact": true
+        }
+      },
+      "hit_token_cap": false
+    }
+  ],
+  "heldout_accessed": false,
+  "training_performed": false,
+  "tool_execution_performed": false,
+  "interpretation": "Conditional predictions on known training contexts, not agent task success or generalization.",
+  "artifact_sha256": {
+    "research/results/tiny-aya-fit300/20261115T064937Z.result.json": "1672461b09ba7e0bd3b15e6c60451bd64830d1ec61fc46d2ffa45755c2969ca2",
+    "research/results/tiny-aya-fit300-contexts/20261115T071048Z.context.jsonl": "d33070fa833cc7c99f8cb1025c837b50e0b36c2e17ea30aaf52534275709d16d",
+    "research/results/tiny-aya-fit300-contexts/20261115T071048Z.prediction.jsonl": "7d9aa39495b1a193a2a4f741de7502e4cfcc2d2f06bb86c5486301ccfc1dfd17",
+    "research/results/tiny-aya-fit300-contexts/20261115T071048Z.metadata.json": "84fc684f33069f46940b5f6bf4bdeabc2eafdfbff4746b919f3125abff784282",
+    "research/results/tiny-aya-fit300-contexts/20261115T071048Z.summary.json": "46adb2b6c2a957a546133b7586e6db96fc53a08b4bc8b50e26056cc9c31d6bea"
+  }
+}

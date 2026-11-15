@@ -1,0 +1,22 @@
+{
+  "curriculum_version": "task-start-plus-corrections-v1",
+  "action_target_count": 31,
+  "source_task_ids": [
+    "B021",
+    "B026",
+    "B041",
+    "B046"
+  ],
+  "initial_action_targets": 4,
+  "gold_rows_sha256": "ef2ef134f4b30dc822879e85d238e206c1c6ef9e949d83f49c60c21c75df33ae",
+  "corrective_rows_sha256": "03fc46a5cbfa41482ffbfda57ff8188bbfc761df998cc01a7f6e5bf0b803bb3b",
+  "rows_sha256": "c78909c5b951303ac8b3c0904008eb207017c1a37fb9c6359c55782d0d47f233",
+  "source_reviews_reused": true,
+  "new_model_generated_targets": false,
+  "heldout_accessed": false,
+  "audit_only_examples_excluded": true,
+  "historical_failed_prefixes_are_targets": false,
+  "training_started": false,
+  "pinned_token_label_preflight": "required_before_training",
+  "interpretation": "New mixture of unchanged previously approved targets; not evidence of successful model training."
+}

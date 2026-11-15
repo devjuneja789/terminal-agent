@@ -1,0 +1,14 @@
+{
+  "job_id": "6af8865329dd05ff0367796e",
+  "log_path": "research/results/tiny-aya-weighted-sft/20261114T160324Z.log",
+  "log_sha256": "5d2f308d4ca5eb3409db6855a61bfe4314a16ca2b7edc59dfb3d66c1ce6d6924",
+  "result_sha256": "120d57ce7d889b9679e005ff7881fd5aad761dce7898d530525127ed291ebe47",
+  "artifact_commit": "1c0559e7eeab4aaea8fffeddf91ff741cfdb2fe0",
+  "adapter_repo": "devjuneja789/terminal-slm-tiny-aya-weighted-64-v1",
+  "source_files_sha256": {
+    "training/agenttune/sft_smoke.py": "ef8ae36055cd48b504f1b1492d2e4417d0daefce8e00749c651a70ebeece1a85",
+    "training/agenttune/weighted_loss.py": "a69714dfcad56a80fabefe68f5df204188d1097866e19d780319a7dfbd95bc99",
+    "training/agenttune/prepare_sft_bundle.py": "546a802d54cba8b36e91692e79c858729bffd346837e148d100169a400905e4b",
+    "configs/tiny_aya_weighted_sft.json": "5162a0a42f2376b323e50e70877a0c5cbb4cf9d9887cc89f578fd0ad3667d442"
+  }
+}

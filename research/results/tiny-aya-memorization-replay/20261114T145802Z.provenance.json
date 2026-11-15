@@ -1,0 +1,28 @@
+{
+  "training_job_id": "6af8752229dd05ff036765b0",
+  "replay_job_id": "6af8769429dd05ff0367677f",
+  "source_log": "research/results/tiny-aya-memorization-replay/20261114T145614Z.log",
+  "source_log_sha256": "262f595c9a1d7f7b5529a55aa40e5a8eec603dd6e3dcc243b32ecd77809c6dab",
+  "all_eight_records_recovered": true,
+  "summary_recomputed_matches": true,
+  "first_prompts_equal_for_each_pair": true,
+  "training_lineage_validated": true,
+  "heldout_accessed": false,
+  "config_sha256": "bc4eb34b689c5d2cd3a94cba850077151570ebacb459c1749657246cab027a90",
+  "trace_audit": {
+    "base": {
+      "write_file_calls": 0,
+      "changed_task_files": [],
+      "protocol_violations": 6,
+      "generated_tokens": 3840
+    },
+    "adapter": {
+      "write_file_calls": 0,
+      "changed_task_files": [],
+      "protocol_violations": 0,
+      "generated_tokens": 673
+    }
+  },
+  "review_method": "assistant trace audit; not owner approval",
+  "first_adapter_prompts_equal_approved_gold": true
+}

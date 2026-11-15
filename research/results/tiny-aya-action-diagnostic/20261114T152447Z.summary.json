@@ -1,0 +1,40 @@
+{
+  "run_id": "20261114T152447Z",
+  "boundary_summary": {
+    "action_count": 16,
+    "previous_audit_count_multiset_reproduced": true,
+    "previous_audit_source_ids_mismatched_due_to_shuffle": 0,
+    "prefix_matches": 16,
+    "exact_gold_label_content_matches": 16,
+    "eos_supervised": 16,
+    "tool_name_spans_identified": 16
+  },
+  "metrics": {
+    "base": {
+      "actions": 16,
+      "teacher_forced_exact": 0,
+      "teacher_forced_tool_name_exact": 8,
+      "teacher_forced_tool_name_scored": 16,
+      "mean_action_token_accuracy": 0.8647609726591515,
+      "mean_action_nll": 0.9178110072389245,
+      "free_action_exact": 1,
+      "free_tool_name_match": 4,
+      "free_schema_valid": 7
+    },
+    "adapter": {
+      "actions": 16,
+      "teacher_forced_exact": 5,
+      "teacher_forced_tool_name_exact": 9,
+      "teacher_forced_tool_name_scored": 16,
+      "mean_action_token_accuracy": 0.9134675518861345,
+      "mean_action_nll": 0.3889904726529494,
+      "free_action_exact": 5,
+      "free_tool_name_match": 9,
+      "free_schema_valid": 15
+    }
+  },
+  "prediction_count": 32,
+  "training_performed": false,
+  "tool_execution_performed": false,
+  "heldout_accessed": false
+}

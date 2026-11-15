@@ -1,0 +1,28 @@
+{
+  "run_id": "20261112T200940Z",
+  "config_id": "terminal-slm-tiny-aya-support-rollout-v5",
+  "split": "train-support",
+  "task_ids": [
+    "B016",
+    "B046",
+    "B041"
+  ],
+  "metrics": {
+    "candidate_count": 3,
+    "benchmark_contract_passes": 2,
+    "automated_task_successes": 2,
+    "scored_candidates": 1,
+    "human_review_required": 3,
+    "training_eligible_candidates": 0,
+    "average_nonnull_reward": -0.02,
+    "reward_status_counts": {
+      "pending_human_factual_review": 2,
+      "rejected_no_file_change": 1
+    },
+    "failure_categories": {
+      "validation_failure": 1
+    }
+  },
+  "elapsed_seconds": 68.808417,
+  "heldout_accessed": false
+}

@@ -1,0 +1,30 @@
+{
+  "config_id": "terminal-slm-native-closing-stops-candidate-v1",
+  "status": "requires_versioned_support_replay",
+  "model_id": "CohereLabs/tiny-aya-global",
+  "model_revision": "af89d219b53ed9b13b8a4645f9c8028973510324",
+  "upstream_generation_eos_token_ids": [
+    3
+  ],
+  "tokenizer_turn_eos_token_id": 6,
+  "chat_response_end_token_id": 261001,
+  "candidate_eos_token_ids": [
+    3,
+    6,
+    261001
+  ],
+  "directly_tested_eos_token_ids": [
+    261001,
+    6
+  ],
+  "upstream_eos_absent_before_first_chat_closing_in_all_controls": true,
+  "union_policy_gpu_tested": false,
+  "applied_to_frozen_configs": false,
+  "source_preflight_run_id": "20261114T213811Z",
+  "source_preflight_config_sha256": "036b0a86172b84843fe0ccb27f9bedfd8203a771ccde342f81faeabcea8696f4",
+  "generation": {
+    "do_sample": false,
+    "max_new_tokens": 256,
+    "use_cache": true
+  }
+}

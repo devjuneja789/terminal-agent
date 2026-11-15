@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import hashlib
 import os
 import shutil
 import subprocess
@@ -36,6 +37,21 @@ class BenchmarkRun:
     observed_tools: tuple[str, ...] = ()
     elapsed_seconds: float = 0.0
     validation_seconds: float = 0.0
+    changed_files: tuple[str, ...] = ()
+
+
+def _task_file_hashes(root: Path) -> dict[str, str]:
+    hashes: dict[str, str] = {}
+    ignored = {".terminal-slm", "__pycache__", ".git"}
+    for path in sorted(root.rglob("*")):
+        relative = path.relative_to(root)
+        if path.suffix == ".pyc" or any(part in ignored for part in relative.parts):
+            continue
+        if path.is_symlink():
+            hashes[relative.as_posix()] = "symlink:" + os.readlink(path)
+        elif path.is_file():
+            hashes[relative.as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashes
 
 
 def run_task(
@@ -57,6 +73,7 @@ def run_task(
     parent = str(workspace_parent) if workspace_parent is not None else None
     workspace = Path(tempfile.mkdtemp(prefix=f"terminal-slm-{task.task_id}-", dir=parent))
     shutil.copytree(task.snapshot_path, workspace, dirs_exist_ok=True)
+    initial_hashes = _task_file_hashes(workspace)
     run_started = time.monotonic()
     agent_error: str | None = None
     try:
@@ -116,6 +133,11 @@ def run_task(
         validation_stdout = _as_text(exc.stdout)
         validation_stderr = _as_text(exc.stderr)
     validation_seconds = time.monotonic() - validation_started
+    final_hashes = _task_file_hashes(workspace)
+    changed_files = tuple(sorted(
+        path for path in set(initial_hashes) | set(final_hashes)
+        if initial_hashes.get(path) != final_hashes.get(path)
+    ))
     condition = task.success_condition
     response = final_response.casefold()
     required = [str(item).casefold() for item in condition.get("response_contains", [])]
@@ -129,14 +151,59 @@ def run_task(
         for term in condition.get("validation_output_contains", [])
         if str(term).casefold() not in validation_output
     ]
+    trajectory_events = trajectory.get("events", []) if isinstance(trajectory, dict) else []
+    tool_output = "\n".join(
+        str(event.get("tool_result", {}).get(key, ""))
+        for event in trajectory_events
+        if event.get("kind") == "tool" and isinstance(event.get("tool_result"), dict)
+        for key in ("stdout", "stderr")
+    ).casefold()
+    tool_output_missing = [
+        str(term)
+        for term in condition.get("tool_output_contains", [])
+        if str(term).casefold() not in tool_output
+    ]
+    missing_tool_evidence: list[str] = []
+    for evidence in condition.get("tool_evidence", []):
+        tool_name = evidence.get("tool")
+        command_terms = evidence.get("command_contains", [])
+        result_terms = evidence.get("result_contains", [])
+        arguments_match = evidence.get("arguments_match", {})
+        matched = False
+        for event in trajectory_events:
+            if event.get("kind") != "tool" or event.get("tool_name") != tool_name or event.get("executed") is False:
+                continue
+            arguments = event.get("tool_arguments", {})
+            command = str(arguments.get("command", "")).casefold()
+            if not isinstance(arguments_match, dict) or any(
+                arguments.get(key) != value for key, value in arguments_match.items()
+            ):
+                continue
+            result = event.get("tool_result")
+            if isinstance(result, dict) and isinstance(result.get("output"), dict):
+                result = result["output"]
+            output = "\n".join(
+                str(result.get(key, "")) for key in ("stdout", "stderr")
+            ).casefold() if isinstance(result, dict) else str(result).casefold()
+            if all(str(term).casefold() in command for term in command_terms) and all(
+                str(term).casefold() in output for term in result_terms
+            ):
+                matched = True
+                break
+        if not matched:
+            missing_tool_evidence.append(str(tool_name))
     success_exit_codes = condition.get("validation_exit_codes", [0])
     failures = [f"missing_response_term:{term}" for term in response_missing]
     failures.extend(f"missing_required_tool:{name}" for name in sorted(required_tools - observed_tools))
     failures.extend(f"missing_validation_output:{term}" for term in validation_missing)
+    failures.extend(f"missing_tool_output:{term}" for term in tool_output_missing)
+    failures.extend(f"missing_tool_evidence:{name}" for name in missing_tool_evidence)
     if validation_exit_code not in success_exit_codes:
         failures.append("validation_timeout" if validation_timed_out else "validation_command_failed")
     if not agent_completed:
         failures.append("agent_incomplete")
+    if condition.get("no_task_file_changes") and changed_files:
+        failures.append("unexpected_task_file_changes")
     passed = not failures
     return BenchmarkRun(
         task_id=task.task_id,
@@ -154,6 +221,7 @@ def run_task(
         observed_tools=tuple(sorted(observed_tools)),
         elapsed_seconds=time.monotonic() - run_started,
         validation_seconds=validation_seconds,
+        changed_files=changed_files,
     )
 
 

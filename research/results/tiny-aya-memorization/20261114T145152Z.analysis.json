@@ -1,0 +1,16 @@
+{
+  "epoch_mean_batch_loss": [
+    0.792363322339952,
+    0.5308964452706277,
+    0.42236220673657954,
+    0.3944327417993918
+  ],
+  "all_16_targets_have_masked_context_and_labels": true,
+  "global_step": 64,
+  "epoch": 4.0,
+  "skipped_optimizer_steps": [],
+  "recorded_length_preflight_value": 2,
+  "max_collated_training_tokens": 2345,
+  "length_preflight_instrumentation_bug": "len(BatchEncoding) counted two mapping keys; future preflight corrected to count input_ids. Raw metadata preserved.",
+  "all_recorded_batches_below_token_cap": true
+}

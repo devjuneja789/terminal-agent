@@ -1,0 +1,21 @@
+{
+  "run_id": "20261114T202246Z",
+  "record_ids": [
+    "base:B021:runtime",
+    "base:B021:reviewed_metadata",
+    "base:B026:runtime",
+    "base:B026:reviewed_metadata",
+    "base:B041:runtime",
+    "base:B041:reviewed_metadata",
+    "adapter:B021:runtime",
+    "adapter:B021:reviewed_metadata",
+    "adapter:B026:runtime",
+    "adapter:B026:reviewed_metadata",
+    "adapter:B041:runtime",
+    "adapter:B041:reviewed_metadata"
+  ],
+  "prediction_count": 12,
+  "training_performed": false,
+  "heldout_accessed": false,
+  "tool_execution_performed": false
+}

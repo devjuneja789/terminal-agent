@@ -1,0 +1,142 @@
+{
+  "run_id": "20261114T213811Z",
+  "rows_sha256": "03fc46a5cbfa41482ffbfda57ff8188bbfc761df998cc01a7f6e5bf0b803bb3b",
+  "label_count": 15,
+  "all_15_label_boundaries_passed": true,
+  "all_15_weight_annotations_passed": true,
+  "max_sequence_tokens": 2490,
+  "upstream_pinned_configs": {
+    "config.json": {
+      "eos_token_id": 3,
+      "bos_token_id": 2,
+      "pad_token_id": 0,
+      "file_sha256": "458a9265b6a96e5ad4bbe1857716bd69e434f062f8b32fae48f5f06197d26384"
+    },
+    "generation_config.json": {
+      "eos_token_id": 3,
+      "bos_token_id": 2,
+      "pad_token_id": 0,
+      "file_sha256": "0efa696e1ebc0484f8e16fcd1141dba1e897c4699ff971052e43ce5d6d4bf4d0"
+    },
+    "tokenizer_config.json": {
+      "eos_token": "<|END_OF_TURN_TOKEN|>",
+      "bos_token": "<BOS_TOKEN>",
+      "pad_token": "<PAD>",
+      "file_sha256": "fb56a3ef7659346aae196a2ab877355f1e7fd871c36843f709bb2e23c606d972"
+    }
+  },
+  "stop_pairs": [
+    {
+      "arm": "base",
+      "task_id": "B021",
+      "legacy_control_reproduced": true,
+      "same_generation_prefix_through_first_closing": true,
+      "legacy_tokens": 256,
+      "candidate_tokens": 43,
+      "legacy_cap_hit": true,
+      "candidate_cap_hit": false,
+      "decoded_action_unchanged": true,
+      "candidate_last_token_id": 261001
+    },
+    {
+      "arm": "base",
+      "task_id": "B026",
+      "legacy_control_reproduced": true,
+      "same_generation_prefix_through_first_closing": true,
+      "legacy_tokens": 256,
+      "candidate_tokens": 36,
+      "legacy_cap_hit": true,
+      "candidate_cap_hit": false,
+      "decoded_action_unchanged": true,
+      "candidate_last_token_id": 261001
+    },
+    {
+      "arm": "base",
+      "task_id": "B041",
+      "legacy_control_reproduced": true,
+      "same_generation_prefix_through_first_closing": true,
+      "legacy_tokens": 256,
+      "candidate_tokens": 42,
+      "legacy_cap_hit": true,
+      "candidate_cap_hit": false,
+      "decoded_action_unchanged": true,
+      "candidate_last_token_id": 261001
+    },
+    {
+      "arm": "adapter",
+      "task_id": "B021",
+      "legacy_control_reproduced": true,
+      "same_generation_prefix_through_first_closing": true,
+      "legacy_tokens": 70,
+      "candidate_tokens": 69,
+      "legacy_cap_hit": false,
+      "candidate_cap_hit": false,
+      "decoded_action_unchanged": true,
+      "candidate_last_token_id": 261001
+    },
+    {
+      "arm": "adapter",
+      "task_id": "B026",
+      "legacy_control_reproduced": true,
+      "same_generation_prefix_through_first_closing": true,
+      "legacy_tokens": 37,
+      "candidate_tokens": 36,
+      "legacy_cap_hit": false,
+      "candidate_cap_hit": false,
+      "decoded_action_unchanged": true,
+      "candidate_last_token_id": 261001
+    },
+    {
+      "arm": "adapter",
+      "task_id": "B041",
+      "legacy_control_reproduced": true,
+      "same_generation_prefix_through_first_closing": true,
+      "legacy_tokens": 138,
+      "candidate_tokens": 137,
+      "legacy_cap_hit": false,
+      "candidate_cap_hit": false,
+      "decoded_action_unchanged": true,
+      "candidate_last_token_id": 261001
+    }
+  ],
+  "metrics": {
+    "base:legacy_turn_only": {
+      "cases": 3,
+      "generated_tokens": 768,
+      "token_cap_hits": 3,
+      "schema_valid": 3,
+      "response_end_tokens": 643,
+      "average_latency_seconds": 15.484555695000077
+    },
+    "base:response_or_turn": {
+      "cases": 3,
+      "generated_tokens": 121,
+      "token_cap_hits": 0,
+      "schema_valid": 3,
+      "response_end_tokens": 3,
+      "average_latency_seconds": 3.0954532373333072
+    },
+    "adapter:legacy_turn_only": {
+      "cases": 3,
+      "generated_tokens": 245,
+      "token_cap_hits": 0,
+      "schema_valid": 2,
+      "response_end_tokens": 3,
+      "average_latency_seconds": 6.698811067666611
+    },
+    "adapter:response_or_turn": {
+      "cases": 3,
+      "generated_tokens": 242,
+      "token_cap_hits": 0,
+      "schema_valid": 2,
+      "response_end_tokens": 3,
+      "average_latency_seconds": 6.6005959969998
+    }
+  },
+  "all_legacy_controls_reproduced": true,
+  "all_candidate_prefix_checks_passed": true,
+  "training_performed": false,
+  "heldout_accessed": false,
+  "frozen_inference_settings_changed": false,
+  "interpretation": "TRL label audit and fixed-prompt EOS comparison; not a live agent benchmark or model improvement"
+}

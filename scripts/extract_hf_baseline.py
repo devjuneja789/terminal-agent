@@ -9,7 +9,14 @@ from pathlib import Path
 from typing import Any
 
 
-def extract(log_path: Path, output_dir: Path, *, summary_only: bool = False) -> tuple[Path, ...]:
+def extract(log_path: Path, output_dir: Path, *, summary_only: bool = False, kind: str = "baseline") -> tuple[Path, ...]:
+    if kind not in {"baseline", "support"}:
+        raise ValueError("kind must be 'baseline' or 'support'")
+    marker_prefix = "BASELINE" if kind == "baseline" else "SUPPORT_ROLLOUT"
+    environment_marker = f"{marker_prefix}_ENVIRONMENT="
+    result_marker = "BASELINE_TASK_RESULT=" if kind == "baseline" else "SUPPORT_ROLLOUT_TASK_RESULT="
+    chunk_marker = "BASELINE_TASK_RESULT_CHUNK=" if kind == "baseline" else "SUPPORT_ROLLOUT_TASK_CHUNK="
+    summary_marker = f"{marker_prefix}_SUMMARY="
     environment: dict[str, Any] | None = None
     summary: dict[str, Any] | None = None
     records: list[dict[str, Any]] = []
@@ -17,10 +24,10 @@ def extract(log_path: Path, output_dir: Path, *, summary_only: bool = False) -> 
     truncated_record_lines = 0
     for line_number, line in enumerate(log_path.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
         for marker, setter in (
-            ("BASELINE_ENVIRONMENT=", "environment"),
-            ("BASELINE_TASK_RESULT=", "record"),
-            ("BASELINE_TASK_RESULT_CHUNK=", "chunk"),
-            ("BASELINE_SUMMARY=", "summary"),
+            (environment_marker, "environment"),
+            (result_marker, "record"),
+            (chunk_marker, "chunk"),
+            (summary_marker, "summary"),
         ):
             position = line.find(marker)
             if position < 0:
@@ -98,7 +105,7 @@ def extract(log_path: Path, output_dir: Path, *, summary_only: bool = False) -> 
             "available_task_ids": actual_ids,
             "missing_task_ids": [task_id for task_id in ids if task_id not in actual_ids],
             "truncated_legacy_task_record_lines": truncated_record_lines,
-            "note": "Aggregate metrics were printed by the completed job, but Hugging Face truncated some long per-task trajectory lines. The partial JSONL contains only complete records; it is not the full run archive.",
+            "note": f"Aggregate metrics were printed by the completed {kind} job, but some long per-task trajectory lines were truncated. The partial JSONL contains only complete records; it is not the full run archive.",
         }
         status_path.write_text(json.dumps(status, indent=2) + "\n", encoding="utf-8")
         return tuple(path for path in (partial_path, metadata_path, summary_path, status_path) if path is not None)
@@ -112,8 +119,9 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--summary-only", action="store_true",
                         help="save aggregate metadata when legacy per-task log lines were truncated")
+    parser.add_argument("--kind", choices=("baseline", "support"), default="baseline")
     args = parser.parse_args()
-    for path in extract(args.log, args.output_dir, summary_only=args.summary_only):
+    for path in extract(args.log, args.output_dir, summary_only=args.summary_only, kind=args.kind):
         print(path)
     return 0
 

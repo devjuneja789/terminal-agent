@@ -1,0 +1,12 @@
+{
+  "job_id": "6af787e829dd05ff0365a16a",
+  "source_log": "research/results/tiny-aya-sft-smoke/20261113T215754Z.log",
+  "source_log_sha256": "d4e67bae25adc91710c22c891021ad9cf0a22082f0f3b184031bcabf4b60f189",
+  "extraction": "SFT_SMOKE_RESULT marker; payload preserved",
+  "dataset_manifest_hash_matches": true,
+  "probe_schema_valid": false,
+  "probe_parse_error": "Invalid \\escape: line 1 column 68 (char 67)",
+  "probe_executed": false,
+  "task_success_measured": false,
+  "artifact_url": "https://huggingface.co/devjuneja789/terminal-slm-sft-smoke-v1/tree/main/20261113T220511Z"
+}

@@ -1,0 +1,15 @@
+{
+  "job_id": "6af882df23985fb9cd823f21",
+  "status": "CANCELED",
+  "reason": "FP16 gradient overflow skipped updates; no adapter/replay accepted",
+  "log": "research/results/tiny-aya-weighted-sft/20261114T154838Z.log",
+  "log_sha256": "e63b996e7ac4e99d32aa01dc3d43e5940da54b3f243ced556d565db0e9bf99ff",
+  "recorded_steps": 38,
+  "nonfinite_grad_norm_steps": [
+    3,
+    10
+  ],
+  "initial_amp_scale": 65536,
+  "rerun_initial_amp_scale": 8192,
+  "heldout_accessed": false
+}

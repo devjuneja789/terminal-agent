@@ -1,0 +1,18 @@
+{
+  "config_id": "terminal-slm-approved-memorization-64-v1",
+  "experiment_kind": "support_memorization_diagnostic",
+  "model_id": "CohereLabs/tiny-aya-global",
+  "model_revision": "af89d219b53ed9b13b8a4645f9c8028973510324",
+  "agenttune_commit": "d4db4c12d52342227c4113a70183d0f64aa2f345",
+  "max_steps": 64,
+  "expected_epochs": 4,
+  "max_length": 4096,
+  "learning_rate": 0.0001,
+  "lr_scheduler_type": "linear",
+  "warmup_steps": 0,
+  "max_grad_norm": 1.0,
+  "lora_rank": 8,
+  "seed": 42,
+  "extra_runtime": {"peft": "0.21.3", "datasets": "5.2.0", "bitsandbytes": "0.50.2", "trl": "1.7.1"},
+  "artifact_repo": null
+}

@@ -1,0 +1,17 @@
+{
+  "source_log": "research/results/tiny-aya-observation-metadata/20261114T202104Z.log",
+  "source_log_sha256": "2231753dac75dd8dca38a106c253f3c1eec0dd1f098041f826c9d4ab6ee53c62",
+  "all_12_records_recovered": true,
+  "job_id": "6af8c2b629dd05ff0367c1e5",
+  "config_sha256": "2783903d87882b196f1e821a194fd95ee466f3f4d27d5c0c56a084f090cbd652",
+  "all_metadata_only_pairs_verified": true,
+  "quantization_and_generation_match_EXP014": true,
+  "all_three_runtime_controls_reproduced": true,
+  "source_files_sha256": {
+    "training/agenttune/prepare_observation_metadata.py": "2e730aa640ce3a6dc3ff432f2a2655a7b8afefcd3edab0c2ad302090b79e49f5",
+    "training/agenttune/observation_intervention.py": "8e0c715e2f193fedd5f64a5b4cb64724a30cb37d3e31d0a5dbfbbc24247702ac",
+    "scripts/run_tiny_aya_observation_metadata.sh": "493768cae2772d8087fb225ae30b02162acbc92fd965076f512fca5353282250",
+    "scripts/analyze_observation_intervention.py": "71938bbddfe291da7577bc0713c7c1b5f1f2de273cb012e71923719554ffac20",
+    "scripts/extract_observation_intervention.py": "5d82325bdd8c8964e998599a9fb2756874f9929752760d626a19d7e8512ff374"
+  }
+}

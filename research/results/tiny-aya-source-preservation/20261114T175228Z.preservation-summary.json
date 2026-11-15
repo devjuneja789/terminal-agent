@@ -1,0 +1,97 @@
+{
+  "run_kind": "source_preservation_diagnostic",
+  "source_diagnostic_run_id": "20261114T175228Z",
+  "adapter_commit": "1c0559e7eeab4aaea8fffeddf91ff741cfdb2fe0",
+  "rows_sha256": "ef2ef134f4b30dc822879e85d238e206c1c6ef9e949d83f49c60c21c75df33ae",
+  "metrics": {
+    "base": {
+      "edit_decisions": 3,
+      "write_file_selected": 0,
+      "gold_content_exact": 0,
+      "gold_ast_equal": 0,
+      "full_file_preserved": 0,
+      "validators_run": 0,
+      "validators_passed": 0
+    },
+    "unweighted64": {
+      "edit_decisions": 3,
+      "write_file_selected": 0,
+      "gold_content_exact": 0,
+      "gold_ast_equal": 0,
+      "full_file_preserved": 0,
+      "validators_run": 0,
+      "validators_passed": 0
+    },
+    "weighted64": {
+      "edit_decisions": 3,
+      "write_file_selected": 2,
+      "gold_content_exact": 1,
+      "gold_ast_equal": 1,
+      "full_file_preserved": 2,
+      "validators_run": 2,
+      "validators_passed": 2
+    },
+    "weighted64_live": {
+      "edit_decisions": 3,
+      "write_file_selected": 2,
+      "gold_content_exact": 0,
+      "gold_ast_equal": 0,
+      "full_file_preserved": 0,
+      "validators_run": 2,
+      "validators_passed": 0
+    }
+  },
+  "pristine_task_validations": {
+    "B021": {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "tests.test_contracts.Contracts.test_page_size_lower_bound"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "F\n======================================================================\nFAIL: test_page_size_lower_bound (tests.test_contracts.Contracts.test_page_size_lower_bound)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/terminal-slm-preservation-og5tmt98/terminal-slm-B021-4cqjfn3c/tests/test_contracts.py\", line 20, in test_page_size_lower_bound\n    self.assertEqual(config.page_size(0), 1)\nAssertionError: 0 != 1\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\n",
+      "timed_out": false,
+      "apply_error": null,
+      "changed_files": [],
+      "passed": false
+    },
+    "B026": {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "tests.test_contracts.Contracts.test_timeout_from_environment"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "F\n======================================================================\nFAIL: test_timeout_from_environment (tests.test_contracts.Contracts.test_timeout_from_environment)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/terminal-slm-preservation-bpkejhvv/terminal-slm-B026-wa0cgff0/tests/test_contracts.py\", line 13, in test_timeout_from_environment\n    self.assertEqual(config.request_timeout(), 25)\nAssertionError: 10 != 25\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)\n",
+      "timed_out": false,
+      "apply_error": null,
+      "changed_files": [],
+      "passed": false
+    },
+    "B041": {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "tests.test_contracts.Contracts.test_timeout_default"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "F\n======================================================================\nFAIL: test_timeout_default (tests.test_contracts.Contracts.test_timeout_default)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/terminal-slm-preservation-49escnbh/terminal-slm-B041-e_l0byj_/tests/test_contracts.py\", line 17, in test_timeout_default\n    self.assertEqual(config.request_timeout(), 15)\nAssertionError: 10 != 15\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\n",
+      "timed_out": false,
+      "apply_error": null,
+      "changed_files": [],
+      "passed": false
+    }
+  },
+  "same_approved_tokens_and_labels_as_EXP011": true,
+  "training_performed": false,
+  "heldout_accessed": false,
+  "training_target_eligible": false,
+  "interpretation": "single-action predictions conditioned on approved histories; not agent success or generalization",
+  "post_hoc_note": "B021 existing upper-bound test added after inspecting its generated edit; reported separately without changing frozen task validation or benchmark scores."
+}

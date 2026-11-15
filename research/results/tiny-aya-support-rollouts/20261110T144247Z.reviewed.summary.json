@@ -1,0 +1,24 @@
+{
+  "run_id": "20261110T144247Z",
+  "source": "research/results/tiny-aya-support-rollouts/20261110T144247Z.jsonl",
+  "review": "research/results/tiny-aya-support-rollouts/20261110T144247Z.review.jsonl",
+  "reviewed_output": "research/results/tiny-aya-support-rollouts/20261110T144247Z.reviewed.jsonl",
+  "metrics": {
+    "candidate_count": 10,
+    "benchmark_contract_passes": 0,
+    "automated_task_successes": 0,
+    "scored_candidates": 5,
+    "human_review_required": 0,
+    "training_eligible_candidates": 0,
+    "average_nonnull_reward": -0.034,
+    "reward_status_counts": {
+      "human_review_rejected": 10
+    },
+    "failure_categories": {
+      "agent_loop_guard": 7,
+      "contract_evidence_failure": 1,
+      "invalid_tool_call": 1,
+      "task_contract_failure": 1
+    }
+  }
+}

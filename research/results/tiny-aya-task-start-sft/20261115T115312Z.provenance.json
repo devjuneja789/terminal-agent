@@ -1,0 +1,6 @@
+{
+  "source_log": "research/results/tiny-aya-task-start-sft/20261115T115107Z.log",
+  "source_log_sha256": "786f9e8e029ebfa7f5786728757ea9ec52ac88a87cc4ed7231db7fd6519ca58c",
+  "complete_training_chunks": true,
+  "artifact_commit": "c1e8bbbcf08a32985a0471633c699f5a68b64cfe"
+}

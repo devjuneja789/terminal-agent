@@ -1,0 +1,50 @@
+{
+  "all_eight_records_recovered": true,
+  "aggregate_metrics_recomputed_equal": true,
+  "evaluation_config_unchanged_except_adapter_identity_and_config_id": true,
+  "quantization_and_effective_tokenizer_unchanged": true,
+  "all_four_initial_prompts_equal_between_arms_and_approved_references": true,
+  "metrics": {
+    "base": {
+      "write_file_executions": 0,
+      "tasks_with_changed_source_files": [],
+      "successful_repairs": 0,
+      "schema_valid_calls": 10,
+      "attempted_calls": 12,
+      "generated_tokens": 3840,
+      "protocol_violations": 6,
+      "repeat_recovery_tasks": [
+        "B026",
+        "B041",
+        "B046"
+      ]
+    },
+    "adapter": {
+      "write_file_executions": 3,
+      "tasks_with_changed_source_files": [
+        "B021",
+        "B041"
+      ],
+      "successful_repairs": 0,
+      "schema_valid_calls": 19,
+      "attempted_calls": 19,
+      "generated_tokens": 965,
+      "protocol_violations": 0,
+      "repeat_recovery_tasks": [
+        "B021",
+        "B026",
+        "B041",
+        "B046"
+      ]
+    }
+  },
+  "trace_audit": {
+    "B021": "One executed write replaces entire module with self-referencing page_size assignment; NameError; repeated write blocked, false model success claim.",
+    "B026": "Runs expected failing test and reads full module, then repeats read; no write; false claim test passes after configuration change.",
+    "B041": "Two executed writes replace entire module with constant and undefined request_timeout() call; NameError; repeated write blocked.",
+    "B046": "Expected failing test is valid observation. Final restates 10 versus 25 without identifying unconditional constant return and ignored environment variable."
+  },
+  "owner_review_status": "not_requested; assistant factual audit only",
+  "training_target_eligible": false,
+  "heldout_accessed": false
+}

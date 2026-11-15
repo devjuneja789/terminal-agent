@@ -1,0 +1,6 @@
+{
+  "source_log": "research/results/tiny-aya-corrective-sft/20261114T221828Z.log",
+  "source_log_sha256": "641d2a510fb1c3dff06e8eac003acc71768049fac6bcc083aae760cd9e501c85",
+  "complete_training_chunks": true,
+  "artifact_commit": "3c151e4280bab3fe27c25a53992a3cc17fc785fc"
+}

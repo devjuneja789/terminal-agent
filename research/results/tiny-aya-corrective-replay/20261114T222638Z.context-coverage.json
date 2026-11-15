@@ -1,0 +1,15 @@
+{
+  "training_task_opening_target_count": 0,
+  "training_target_count": 15,
+  "exact_training_prompt_visits": {
+    "base:B021": 0,
+    "base:B026": 0,
+    "base:B041": 0,
+    "base:B046": 0,
+    "adapter:B021": 0,
+    "adapter:B026": 0,
+    "adapter:B041": 0,
+    "adapter:B046": 0
+  },
+  "interpretation": "Exact textual overlap only. Different tool paths, results and temporary traceback paths can break a match; absence does not prove lack of semantic coverage or establish a causal explanation."
+}

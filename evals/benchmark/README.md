@@ -35,7 +35,7 @@ Each record contains:
 | `instruction` | User request passed to the agent. |
 | `expected_outcome` | Human-readable description of the expected behavior/change. |
 | `validation_command` | Argument vector run in the isolated task workspace. |
-| `success_condition` | Required final-answer terms, tool names, and accepted validation exit codes. |
+| `success_condition` | Required final-answer terms, tool names, accepted validation exit codes, optional tool-output evidence, and file-change constraints. |
 | `reference_patch` | Optional patch text; omitted in this initial set. |
 
 `load_benchmark(split)` validates IDs, split assignment, snapshot containment,
@@ -72,20 +72,18 @@ loading tasks. Validation uses a clean, workspace-scoped environment and a
 timeout. The evaluator aggregates only records produced by actual runs; its
 unit tests use isolated fixtures and do not persist evaluation results.
 
-The evaluator CLI uses the local Transformers model and always requires one
-explicit split. A small support-split run can be started with:
+The standalone `evals.benchmark.evaluator` is an earlier local Transformers
+integration retained for framework development; it is not the runner used to
+produce the current hackathon results. The reported cloud baseline and paired
+evaluation use the versioned AgentTune path in `training/agenttune/`, described
+in [the reproduction guide](../../submission/REPRODUCING.md). The current
+results and actual task trajectories are linked from
+[submission/RESULTS.md](../../submission/RESULTS.md).
 
-```sh
-python -m evals.benchmark.evaluator \
-  --split train-support \
-  --model-path ./models/Qwen3-1.7B \
-  --task-id B001 --task-id B002 --task-id B003
-```
-
-Use `--split held-out-eval` only for evaluation. Task IDs are checked against
-the selected split before model initialization, so a held-out ID cannot be
-selected from a support run. Results go to split-specific directories under
-`evals/benchmark/results/` unless explicit paths are supplied. Each JSONL row
+Task IDs are checked against the selected split before model initialization,
+so a held-out ID cannot be selected from a support run. Results go to
+split-specific directories under `evals/benchmark/results/` unless explicit
+paths are supplied. Each JSONL row
 includes the complete agent trajectory, validation output, outcome, failure
 category, and per-task metrics. Records include model/config fingerprints,
 package versions, quantization/dtype, prompt text and hash, tool schemas and
@@ -114,23 +112,22 @@ Metric definitions:
 Success conditions may also require `validation_output_contains` terms; these
 are matched against combined stdout/stderr. This is used by test-explanation
 tasks so an unrelated nonzero exit cannot count as the expected failure.
+They may also declare `tool_evidence` entries containing a tool name,
+`command_contains` terms, `arguments_match` exact argument values, and
+`result_contains` terms. All specified conditions must match the same executed
+tool call. B016 and B046 require reading the expected source file and observing
+the function body; B046 separately requires the agent's own test run to observe
+`AssertionError: 10 != 25`. The benchmark runner's separate validation output
+cannot satisfy that evidence. B046 also fails if any task file changes.
+
+On 2026-11-10, selected support pilot tasks were clarified after rollout
+evidence: B001 asks grep to find the `ROUTES` definition rather than search file
+names; B006 requires `read_file` in addition to `grep`; B011 and B016 name the
+exact settings/source file and require reading the implementation; B021, B026,
+B031, B036, and B041 identify the target file and acceptance test; and B046
+requires the tool evidence above. These revisions apply only to `train-support`;
+held-out records and the frozen baseline config were not changed. See EXP-005.
 
 The initial miniapp is a compact framework smoke corpus, not a claim of broad
 coverage across real repositories. Review task difficulty and repository
 diversity before freezing a larger benchmark version.
-
-## Initial evaluator exercise
-
-Two real support-split diagnostic runs used the locally installed Qwen3-1.7B
-checkpoint on CPU because CUDA was not accessible in the evaluator environment.
-The first selected three tasks; the second selected seven tasks from several
-categories. Across these ten tasks, 2 passed. Aggregate measured results were
-20% task success, 33.3% tool selection accuracy, 100% argument/schema validity,
-0% invalid tool-call rate, 1.5 executed tool steps/task, 2.5 model turns/task,
-2,374.2 tokens/task, and 226.3 seconds/task. Failures were five tool execution,
-one task-contract, one validation, and one agent timeout. These are diagnostic
-support-split observations, not a complete benchmark baseline or held-out
-score. Their trajectories and per-run summaries are in
-`results/train-support/run_20261016T184521Z.*` and
-`results/train-support/run_20261016T185715Z.*`. No held-out task was run, and
-these trajectories were not placed in a training-data directory.

@@ -1,0 +1,180 @@
+{
+  "run_id": "20261114T202246Z",
+  "run_kind": "matched_observation_metadata_intervention",
+  "metrics": {
+    "base:runtime": {
+      "decisions": 3,
+      "write_file_selected": 0,
+      "full_file_preserved": 0,
+      "exact_gold_file": 0,
+      "schema_valid": 3,
+      "validators_run": 0,
+      "named_validator_passes": 0,
+      "writes_passing_preservation_and_recorded_checks": 0,
+      "generated_tokens": 768,
+      "token_cap_hits": 3,
+      "average_latency_seconds": 15.811734750333358
+    },
+    "base:reviewed_metadata": {
+      "decisions": 3,
+      "write_file_selected": 0,
+      "full_file_preserved": 0,
+      "exact_gold_file": 0,
+      "schema_valid": 3,
+      "validators_run": 0,
+      "named_validator_passes": 0,
+      "writes_passing_preservation_and_recorded_checks": 0,
+      "generated_tokens": 768,
+      "token_cap_hits": 3,
+      "average_latency_seconds": 15.584310240666696
+    },
+    "adapter:runtime": {
+      "decisions": 3,
+      "write_file_selected": 1,
+      "full_file_preserved": 0,
+      "exact_gold_file": 0,
+      "schema_valid": 2,
+      "validators_run": 1,
+      "named_validator_passes": 1,
+      "writes_passing_preservation_and_recorded_checks": 0,
+      "generated_tokens": 245,
+      "token_cap_hits": 0,
+      "average_latency_seconds": 6.860170943666731
+    },
+    "adapter:reviewed_metadata": {
+      "decisions": 3,
+      "write_file_selected": 1,
+      "full_file_preserved": 0,
+      "exact_gold_file": 0,
+      "schema_valid": 2,
+      "validators_run": 1,
+      "named_validator_passes": 0,
+      "writes_passing_preservation_and_recorded_checks": 0,
+      "generated_tokens": 251,
+      "token_cap_hits": 0,
+      "average_latency_seconds": 7.0640081026667
+    }
+  },
+  "pairs": [
+    {
+      "arm": "base",
+      "task_id": "B021",
+      "identity_control": false,
+      "inputs_equal": false,
+      "input_tokens_equal": false,
+      "outputs_equal": true,
+      "original_selected_tool": "shell",
+      "full_selected_tool": "shell"
+    },
+    {
+      "arm": "base",
+      "task_id": "B026",
+      "identity_control": false,
+      "inputs_equal": false,
+      "input_tokens_equal": false,
+      "outputs_equal": true,
+      "original_selected_tool": "shell",
+      "full_selected_tool": "shell"
+    },
+    {
+      "arm": "base",
+      "task_id": "B041",
+      "identity_control": false,
+      "inputs_equal": false,
+      "input_tokens_equal": false,
+      "outputs_equal": true,
+      "original_selected_tool": "shell",
+      "full_selected_tool": "shell"
+    },
+    {
+      "arm": "adapter",
+      "task_id": "B021",
+      "identity_control": false,
+      "inputs_equal": false,
+      "input_tokens_equal": false,
+      "outputs_equal": true,
+      "original_selected_tool": null,
+      "full_selected_tool": null
+    },
+    {
+      "arm": "adapter",
+      "task_id": "B026",
+      "identity_control": false,
+      "inputs_equal": false,
+      "input_tokens_equal": false,
+      "outputs_equal": true,
+      "original_selected_tool": "read_file",
+      "full_selected_tool": "read_file"
+    },
+    {
+      "arm": "adapter",
+      "task_id": "B041",
+      "identity_control": false,
+      "inputs_equal": false,
+      "input_tokens_equal": false,
+      "outputs_equal": false,
+      "original_selected_tool": "write_file",
+      "full_selected_tool": "write_file"
+    }
+  ],
+  "control_condition": "runtime",
+  "intervention_condition": "reviewed_metadata",
+  "archived_adapter_outputs_reproduced": {
+    "B021": true,
+    "B026": true,
+    "B041": true
+  },
+  "all_matched_prompt_checks_passed": true,
+  "identity_control_outputs_equal": null,
+  "pristine_validations": {
+    "B021": {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "tests.test_contracts.Contracts.test_page_size_lower_bound"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "F\n======================================================================\nFAIL: test_page_size_lower_bound (tests.test_contracts.Contracts.test_page_size_lower_bound)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/terminal-slm-preservation-maia1dlr/terminal-slm-B021-plzev77x/tests/test_contracts.py\", line 20, in test_page_size_lower_bound\n    self.assertEqual(config.page_size(0), 1)\nAssertionError: 0 != 1\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\n",
+      "timed_out": false,
+      "apply_error": null,
+      "changed_files": [],
+      "passed": false
+    },
+    "B026": {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "tests.test_contracts.Contracts.test_timeout_from_environment"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "F\n======================================================================\nFAIL: test_timeout_from_environment (tests.test_contracts.Contracts.test_timeout_from_environment)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/terminal-slm-preservation-lrbl_ijx/terminal-slm-B026-mha8dfue/tests/test_contracts.py\", line 13, in test_timeout_from_environment\n    self.assertEqual(config.request_timeout(), 25)\nAssertionError: 10 != 25\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\n",
+      "timed_out": false,
+      "apply_error": null,
+      "changed_files": [],
+      "passed": false
+    },
+    "B041": {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "tests.test_contracts.Contracts.test_timeout_default"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "F\n======================================================================\nFAIL: test_timeout_default (tests.test_contracts.Contracts.test_timeout_default)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/terminal-slm-preservation-nn4vs_4p/terminal-slm-B041-om_9ioh1/tests/test_contracts.py\", line 17, in test_timeout_default\n    self.assertEqual(config.request_timeout(), 15)\nAssertionError: 10 != 15\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\n",
+      "timed_out": false,
+      "apply_error": null,
+      "changed_files": [],
+      "passed": false
+    }
+  },
+  "training_performed": false,
+  "heldout_accessed": false,
+  "training_target_eligible": false,
+  "interpretation": "single next-action intervention within fixed archived adapter histories; not complete agent task performance"
+}

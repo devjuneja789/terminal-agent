@@ -1,0 +1,61 @@
+{
+  "run_id": "20261115T071710Z",
+  "all_freeze_contract_and_summary_checks_passed": true,
+  "candidate_freeze_sha256": "757e6e21df5a63fcd7c6024019148052235c5052832eaea40015183824b21a98",
+  "metrics": {
+    "base": {
+      "task_count": 10,
+      "successful_tasks": 1,
+      "task_success_rate": 0.1,
+      "tool_selection_accuracy": 0.3125,
+      "argument_schema_validity": 0.9411764705882353,
+      "invalid_tool_call_rate": 0.058823529411764705,
+      "average_tool_steps_per_task": 1.3,
+      "average_model_turns_per_task": 2.6,
+      "average_tokens_per_task": 4112.8,
+      "average_latency_seconds": 6.9263739,
+      "failure_categories": {
+        "invalid_tool_call": 1,
+        "task_contract_failure": 3,
+        "validation_failure": 5
+      }
+    },
+    "adapter": {
+      "task_count": 10,
+      "successful_tasks": 2,
+      "task_success_rate": 0.2,
+      "tool_selection_accuracy": 0.35714285714285715,
+      "argument_schema_validity": 0.9473684210526315,
+      "invalid_tool_call_rate": 0.05263157894736842,
+      "average_tool_steps_per_task": 1.1,
+      "average_model_turns_per_task": 2.8,
+      "average_tokens_per_task": 4471.8,
+      "average_latency_seconds": 10.6410785,
+      "failure_categories": {
+        "invalid_tool_call": 1,
+        "task_contract_failure": 3,
+        "validation_failure": 4
+      }
+    }
+  },
+  "generation_audit": {
+    "base": {
+      "captured_generations": 26,
+      "cap_hits": 0,
+      "native_stop_hits": 26,
+      "captured_generated_tokens": 853,
+      "harness_generated_tokens": 853,
+      "note": "Captured generations also retain calls rejected after a cooperative deadline; harness token accounting may exclude them."
+    },
+    "adapter": {
+      "captured_generations": 28,
+      "cap_hits": 0,
+      "native_stop_hits": 28,
+      "captured_generated_tokens": 1185,
+      "harness_generated_tokens": 1185,
+      "note": "Captured generations also retain calls rejected after a cooperative deadline; harness token accounting may exclude them."
+    }
+  },
+  "heldout_training_use_prohibited": true,
+  "source_records_sha256": "7b5f92f9e63f45e7abd87b65ea441aa0d4ac1cbddd209246fe01da5c67920955"
+}

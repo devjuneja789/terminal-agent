@@ -1,0 +1,5 @@
+{
+  "status": "not_prepared",
+  "published": false,
+  "note": "The earlier generated upload bundle was stale and has been removed. Regenerate it from the final reviewed source after confirming source/data licensing and publication scope."
+}

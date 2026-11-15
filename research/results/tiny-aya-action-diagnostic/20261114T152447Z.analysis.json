@@ -1,0 +1,30 @@
+{
+  "run_id": "20261114T152447Z",
+  "all_16_boundaries_rechecked": true,
+  "all_32_generated_actions_reparsed": true,
+  "metrics_recomputed_match": true,
+  "all_16_end_tokens_supervised_once": true,
+  "adapter_by_expected_tool": {
+    "read_file": {
+      "targets": 4,
+      "tool_name_matches": 1,
+      "exact_actions": 0
+    },
+    "write_file": {
+      "targets": 3,
+      "tool_name_matches": 0,
+      "exact_actions": 0
+    },
+    "shell": {
+      "targets": 5,
+      "tool_name_matches": 5,
+      "exact_actions": 5
+    },
+    "finish": {
+      "targets": 4,
+      "tool_name_matches": 3,
+      "exact_actions": 0
+    }
+  },
+  "interpretation": "approved reference histories; no tools executed; no task-success claim"
+}

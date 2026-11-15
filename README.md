@@ -1,165 +1,117 @@
 # Terminal-SLM
 
-Terminal-SLM is a research project to improve reliable terminal/tool use on executable coding tasks. It began with Qwen3-1.7B and has pivoted for the Lexsi Track 3 hackathon to CohereLabs/Tiny Aya Global with AgentTune and AuditKIT. Model inference and any post-training for this submission run on Hugging Face GPU infrastructure; the local GTX 1060 is for development and CPU-only checks.
+**Track 3: Agentic Fine-tuning.** Terminal-SLM studies whether reviewed
+supervised demonstrations can improve a small model's reliability when using
+workspace-scoped terminal tools on executable coding tasks.
 
-## Research question
+## Current result
 
-Does AgentTune post-training improve Tiny Aya Global's success on isolated, executable terminal tasks while reducing invalid or inefficient tool actions, compared with the untouched model under a fixed evaluation procedure?
+The frozen, matched held-out evaluation compared the untouched
+`CohereLabs/tiny-aya-global` model with a support-selected adapter. The base
+passed 1/10 benchmark contracts and the adapter passed 2/10. Neither completed
+a code-repair task (0/5 each), and trace review found the adapter's additional
+pass contained an inaccurate explanation. We do **not** claim reliable
+end-to-end improvement.
 
-## Planned phases
+A later, separate support-only task-start experiment passed 2/4 tasks with its
+adapter versus 0/4 with the base. Two file edits were independently checked
+against reviewed references and tests; two tasks still failed. This is
+exploratory support evidence, not held-out performance, and that adapter was
+not evaluated on the held-out set. See [EXP-027](research/experiments/EXP-027-task-start-curriculum-plan.md).
 
-- **0 — Hackathon access/model choice: complete.** Tiny Aya Global access and HF GPU credits are confirmed by the user.
-- **1 — Cloud smoke: complete.** Tiny Aya completed a support-task tool-use smoke in an HF GPU Job; failure traces are retained.
-- **2 — Freeze baseline harness: complete.** The cloud runner, pinned config, and held-out-only bundle are prepared.
-- **3 — Untouched-model baseline: complete.** Tiny Aya scored 0/10 on the frozen held-out set. A same-config recovery run reproduced the metrics and captured all ten trajectories; see EXP-004.
-- **4 — Support-only rollouts/reward validation.** Use train-support tasks only after the base baseline is reviewed.
-- **5 — One bounded AgentTune fine-tuning pilot.** GRPO/LoRA is the planned route, subject to a successful reward and budget pilot; no training has started.
-- **6 — Paired AuditKIT evaluation.** Compare untouched and tuned model under the same frozen conditions.
-- **7 — Public packaging and submission.** Publish permitted artifacts and submit by the hackathon deadline.
+See the [matched evaluation](submission/RESULTS.md), [trace review](submission/TRACE-REVIEW.md),
+[reproduction guide](submission/REPRODUCING.md), and [recorded walkthrough](submission/demo.html).
 
-The original Qwen-focused research pipeline remains documented below as historical project context. The active hackathon sequence is **Tiny Aya base → fixed held-out baseline → support-only AgentTune rollouts → one bounded post-training pilot → paired AuditKIT evaluation → public submission**. DPO and local GGUF deployment are deferred for the hackathon timeframe. No Tiny Aya baseline or training result is claimed yet.
+## Research question and method
 
-## Phase A1 architecture
+Does AgentTune supervised post-training on reviewed terminal-use demonstrations
+improve Tiny Aya Global's executable task success and tool-call reliability
+compared with the untouched model under a fixed evaluation procedure?
 
-`tools.Toolbox` binds the five agent-facing operations to one `Workspace`:
-
-- `shell(command, timeout)` runs Bash from the workspace root with a 30-second default timeout, a 300-second maximum, 64 KiB stdout/stderr caps, and JSONL command logging.
-- `read_file(path, start_line, end_line)` and `write_file(path, content)` use workspace-relative paths and reject absolute paths, traversal, and symlink escapes.
-- `grep(pattern, path)` searches one file or recursively searches a directory within the workspace, returning up to 1,000 matches.
-- `git(command)` runs a restricted set of Git subcommands from the workspace, without shell interpolation or network operations.
-
-If no workspace is provided, `Toolbox()` creates a temporary directory outside the user's home directory. A caller can pass an explicit task/project directory or use the API as a context manager:
-
-```python
-from tools import Toolbox
-
-with Toolbox() as tools:
-    result = tools.shell("pwd")
-```
-
-Subprocesses receive an allowlisted environment; `HOME`, temporary paths, XDG paths, and Git configuration are redirected into the workspace. Shell commands are logged at `.terminal-slm/tool.log.jsonl`. Obvious destructive operations (such as recursive `rm`, `sudo`, `find -delete`, forced Git cleanup, and history rewriting) are denied.
-
-The tool layer is a workspace-scoped guardrail, not an operating-system sandbox: shell commands execute arbitrary programs, and a deliberately supplied absolute path can still be accessed by those programs. The agent loop must preserve the workspace boundary and treat command execution as a privileged capability.
-
-## Phase A2 model and tool-call protocol
-
-The inference boundary is `ModelClient.generate(messages, tools, timeout=None) -> str`: it returns raw assistant text and does not parse calls or execute tools. `LocalTransformersClient` is the initial local implementation. It supplies the OpenAI-style tool schemas to Qwen3's own tokenizer chat template, then returns decoded output without rewriting the model's native protocol. Model loading is lazy and `local_files_only=True` by default, so inference does not silently download weights.
-
-The protocol remains Qwen3's native format:
+The active experiment path is:
 
 ```text
-<tool_call>{"name":"write_file","arguments":{"path":"notes.txt","content":"hello"}}</tool_call>
+CohereLabs/tiny-aya-global
+    → AgentTune Cohere-action terminal loop
+    → fixed 50-task repository benchmark (40 support / 10 held-out)
+    → matched base evaluation
+    → reviewed support-only QLoRA SFT
+    → frozen adapter evaluation + AuditKIT trace audit
 ```
 
-Tool definitions live separately in `tools/definitions.py`. `agent/parser.py` parses each native block and validates JSON, tool name, required fields, types, ranges, and unexpected fields. It validates every call in an assistant response before the executor can run any of them. `agent/loop.py` handles sequential model/tool turns; `tools/executor.py` dispatches validated calls to the existing workspace-bound `Toolbox`. Plain assistant text with no tool-call block is treated as the final response. There is no remote-host client or alternate call syntax.
+Inference and training run on Hugging Face GPU Jobs. The local machine is used
+for repository work and CPU-only checks. The project does not use held-out task
+records, outcomes, or rewards as training data. DPO, GRPO, GGUF conversion, and
+local model deployment were not part of this submission.
 
-The local Transformers inference adapter is implemented but not runnable in the inspected environment yet: PyTorch, Transformers, and local Qwen3 model files are absent. A loopback-only OpenAI-compatible client can connect to a local inference server; it does not use credentials or send prompts to remote hosts. Install/use model dependencies only when preparing to run real inference. Tests use fake `ModelClient` instances and do not fabricate model outputs as evaluation results.
+## Architecture
 
-The implementation uses the Python standard library for parsing, schemas, orchestration, CLI, and tests. Its suite runs with `python3 -m unittest discover -v`; actual `LocalTransformersClient` generation requires the optional `torch` and `transformers` packages.
+The cloud evaluation runner uses AgentTune for the model/action loop and
+trajectory capture. Terminal-SLM supplies isolated repository snapshots,
+five workspace-scoped tools (`shell`, `read_file`, `write_file`, `grep`, `git`),
+executable task validators, frozen split definitions, and audit scripts. The
+complete trajectories are checked by independent harness metrics and AuditKIT.
 
-## Phase A3 bounded agent loop
+The repository also contains the earlier standalone tool harness and CLI in
+`agent/`, `tools/`, `model/`, and `cli.py`. The current reported cloud
+experiments use `training/agenttune/`; the standalone local Transformers path
+is not used to produce the reported results.
 
-`AgentLoop` receives a user request, passes the five schemas to `ModelClient`, validates each response before execution, appends each tool observation as a `tool` message, and repeats until normal assistant text or a stop condition. `AgentConfig` sets maximum tool calls, wall-clock execution time, conversation characters, and serialized tool-output characters. Calls beyond the tool limit are recorded as skipped; oversized observations are clipped and marked. The loop records timestamped model/tool events, request, arguments, results, final response, and stop reason in `AgentTrajectory.to_dict()`.
+## Experiment plan
 
-The deadline is cooperative across Python operations: it is passed to the model client and to shell/Git timeout handling, and the loop will not start another action after the deadline. A model backend must honor its timeout contract; synchronous file/grep operations cannot be forcibly interrupted mid-call. The loop does not add planning or long-term memory.
+- **A — Agent/tool harness:** workspace-scoped tools, bounded loop, trajectory capture, and CLI implemented. Cloud experiments use the AgentTune Cohere-action integration.
+- **B — Executable benchmark:** 50 deterministic repository tasks; fixed 40-task support and 10-task held-out split.
+- **C — Baseline:** untouched Tiny Aya scored 0/10 on the frozen held-out benchmark.
+- **D — Supervised fine-tuning:** adapter training, label/gradient/update/reload checks, paired held-out evaluation, and a later support-only task-start diagnostic completed. Results and limitations are documented; no reliable repair gain was established.
+- **E — DPO:** not run; no need established for this submission.
+- **F — GRPO:** not run; deferred.
+- **G — Quantized local deployment:** not run; deferred. The chosen inference path is cloud GPU evaluation.
 
-## Phase A4 CLI
+## Reproduce and inspect
 
-The source checkout includes a `term-agent` launcher and `cli.py`. Run a task against an explicit project directory with:
+Core repository checks need Python's standard library:
 
 ```sh
-./term-agent --workspace ./my-project "Fix the failing authentication tests"
+python3 -m unittest discover -v
 ```
 
-The launcher is also named `term-agent`; add the checkout directory to `PATH` to invoke it without the `./` prefix.
-
-Without `--workspace`, the CLI creates a fresh temporary directory outside the home directory and removes it at exit. This default is isolated and starts empty; pass a project/task directory explicitly when the agent needs to inspect existing files. The tool layer still enforces workspace-relative file operations and its shell guardrails; it is a workspace-scoped guardrail, not an operating-system sandbox.
-
-Tasks can also be piped from scripts or entered interactively when no task argument is given:
+To independently inspect the completed held-out records with AuditKIT, install
+the audit dependencies from `requirements-audit.txt`, then run:
 
 ```sh
-printf '%s\n' 'Summarize the workspace files' | ./term-agent --workspace ./my-project
+python3 -m evals.auditkit_report \
+  research/results/tiny-aya-final-heldout/20261115T071710Z.jsonl \
+  --output-prefix submission/auditkit/final
 ```
 
-Use `--model-path /path/to/checkpoint` for local Transformers inference (default: `Qwen/Qwen3-1.7B`, local files only), or `--model-endpoint http://127.0.0.1:8080/v1/chat/completions --model-name Qwen3-1.7B` for a local OpenAI-compatible server. Endpoints are restricted to loopback addresses. `--max-steps N` sets the tool-call limit and `--max-seconds N` sets the run time limit, including lazy model loading. The CLI prints model/action summaries, tool results, and the final response. Exit status is `0` on completion, `2` for input/workspace errors, `3` for the step limit, `4` for time/conversation limits, and nonzero for model or agent errors.
+This audits saved episodes and does not run model inference. Cloud job launchers
+in `scripts/` require Hugging Face access, credentials supplied securely to the
+job, and billable GPU resources. Review their configs and the reproduction guide
+before launching jobs.
 
-The path through the harness is:
+## Hardware and availability
 
-```text
-task input → CLI/workspace → ModelClient + five tool schemas → AgentLoop
-                                                    ↑            ↓
-                                         model response ← ToolExecutor/Toolbox
-```
+- **Local development host:** WSL2 Ubuntu, Python 3.12.3, about 7.7 GiB RAM, and a workspace filesystem with about 261 GiB free at the latest check. The host GPU is a GTX 1060 Max-Q with 6 GiB VRAM, but NVML access is blocked from the current environment. PyTorch and the model-training packages are not installed locally; local CUDA inference was not attempted.
+- **Cloud experiments:** Hugging Face GPU Jobs. The matched held-out run used a Tesla T4 (16 GiB); the recorded job environment used Python 3.12.16, PyTorch 2.11.0+cu130, Transformers 5.22.1, AgentTune 1.1.3, and Accelerate 1.15.0. Training and inference configuration are recorded with each run.
+- **Model:** Tiny Aya Global, pinned to revision `af89d219b53ed9b13b8a4645f9c8028973510324` in the reported experiments.
 
-The CLI logs the completed trajectory in order and displays bounded tool observations; detailed timestamps, arguments, outcomes, and stop reason remain available in `AgentResult.trajectory` for future integrations.
+See [DEVELOPMENT.md](DEVELOPMENT.md) for inspection commands and compatibility notes.
 
-## Terminal-SLM hackathon pivot
+## Repository map
 
-For the Lexsi Track 3 submission, the selected model is CohereLabs/Tiny Aya
-Global. The Qwen3 architecture and historical results above are retained as
-prior project work; the hackathon inference and evaluation path uses Tiny Aya
-on Hugging Face GPU Jobs through AgentTune's Cohere fallback format. The frozen
-baseline and same-config trace-recovery run are recorded in EXP-004: 0/10
-held-out tasks passed, with complete traces available from the recovery run.
+- `agent/`, `tools/`, `model/`, `cli.py` — standalone workspace tool harness and CLI.
+- `evals/benchmark/` — task contracts, snapshots, fixed split, and evaluator.
+- `training/agenttune/`, `configs/`, `scripts/` — cloud training/evaluation integration and reproducible launch/extraction utilities.
+- `data/` — reviewed support examples, admission decisions, and provenance.
+- `research/experiments/` — protocols, results, failure analysis, and design decisions.
+- `research/results/` — actual run outputs; raw GPU job console logs are excluded by `.gitignore`.
+- `submission/` — results, reproduction instructions, trace review, and a recorded demo.
 
-The frozen configuration is `configs/tiny_aya_eval.json`. It pins the model
-revision, Python and package versions, decoding parameters, prompt, tool-schema
-hash, held-out task IDs, success rule, and limits. The baseline and a separate
-same-config trace recovery run are complete; see EXP-004 for results:
+## Limitations
 
-```sh
-./scripts/run_tiny_aya_baseline.sh
-```
-
-The launcher stages a bundle containing only the ten permanent held-out task
-records and snapshot, invokes the model inside the cloud GPU job, and saves the
-complete job log, JSONL trajectories, environment metadata, and summary under
-`research/results/tiny-aya-baseline/`. It does not send held-out records to any
-training path. See `training/agenttune/README.md` and
-`research/experiments/EXP-003-tiny-aya-eval-config.md` for the frozen setup and
-the next phase gate.
-
-## Phase A model smoke gate
-
-`evals/manual_smoke.py` defines five disposable repository tasks: locate a function, find an environment variable, read a file, run one existing unit test, and write a marker file. Each task uses a temporary copy of the checkout, stores the complete timestamped trajectory and per-task metrics in `research/results/manual_smoke_*.jsonl`, and checks its result with a small explicit verifier. This is a harness integration check, not the Phase B benchmark.
-
-The initial smoke attempt on 2026-10-10 was blocked by missing dependencies and weights. On 2026-10-16 the checkpoint loaded and all five tasks completed the agent loop. The first report showed 3/5 because two smoke verifiers misread valid results: `unittest` writes its `OK` summary to stderr, and the marker request did not require a trailing newline. Both verifiers now match the observed behavior, so the saved trajectories support a corrected 5/5 smoke outcome; rerun the suite with the updated verifier before treating that as a fresh recorded pass. The earlier inference bug and its fix are documented in `DEVELOPMENT.md`. Use `--model-path` when weights are stored in a non-default local directory.
-
-## Phase B executable benchmark framework
-
-The initial version contains 50 deterministic tasks across ten categories, with a pinned miniapp repository snapshot and independent task workspaces. The split is fixed at 40 train-support and 10 held-out evaluation tasks. Held-out IDs are frozen in `evals/benchmark/manifest.json`; the loader, evaluator CLI, metrics, and result format are documented in [evals/benchmark/README.md](evals/benchmark/README.md). Evaluation writes trajectories and summaries to split-specific result directories. Held-out tasks are excluded from support runs and training trajectory generation.
-
-## What to do at each phase gate
-
-- **A — Harness and smoke:** install a PyTorch build that supports the GTX 1060's Pascal architecture, install a compatible Transformers version, make the Qwen3-1.7B weights available locally, verify CUDA in the same WSL environment, then rerun the five-task smoke suite. Do not move to baseline claims until several real tasks pass and trajectories have been reviewed.
-- **B — Benchmark:** review and approve task scope, isolation, and objective checks; create the formal benchmark only after the A smoke gate passes.
-- **C — Baseline:** freeze the base model/runtime/configuration, run every benchmark task, inspect failures, and retain raw trajectories and aggregate metrics.
-- **D — QLoRA SFT:** choose/verify a cloud GPU, curate and review training examples, pin a separate training environment, and save the config, data version, and checkpoint metadata.
-- **E — Optional DPO:** proceed only if reviewed preference pairs exist and baseline errors show a preference-learning opportunity; compare against the unchanged baseline.
-- **F — Optional GRPO:** proceed only if the benchmark reward is stable and cloud compute is available; log reward definitions, sampling settings, and all runs.
-- **G — GGUF/local deployment:** select the checkpoint, quantize it, run llama.cpp on the target machine, and compare tool behavior and task outcomes against the recorded baseline.
-
-## Hardware constraints
-
-The local NVIDIA GTX 1060 Max-Q with 6 GB VRAM has been confirmed from a plain WSL terminal. The recorded host check showed driver 582.78 and CUDA driver support through 13.0; the sandboxed inspection used for this project did not expose the GPU, and `nvcc`/CUDA toolkit availability remains unverified. Local use is intended for development, evaluation, and quantized inference. Training is expected to use cloud GPUs; no cloud account, GPU, or credentials have been checked or assumed.
-
-The current environment has about 7.7 GiB RAM and 283 GiB free on the workspace filesystem. It has Python 3.12.3, but no PyTorch or model-training packages are installed. See [DEVELOPMENT.md](DEVELOPMENT.md) for inspection details and limits.
-
-## What is currently available
-
-- WSL2 on Ubuntu 24.04.1 LTS, x86_64, with Python 3.12.3 and pip 24.0.
-- A Git repository on `main` tracking `origin/main`, with global identity and GitHub credential-helper configuration.
-- The Phase A1 `Toolbox` implementation and its standard-library unit tests.
-- The A2 native tool-call client/parser and A3 bounded loop with scripted mock-client tests.
-- The existing `implementation_plan_claude.md` planning note.
-- Public Hugging Face listing for [`Qwen/Qwen3-1.7B`](https://huggingface.co/Qwen/Qwen3-1.7B). This confirms the repository is listed publicly, but model weights have not been downloaded and download access from this machine has not been tested.
-
-## What is missing or unverified
-
-- PyTorch, Transformers, Datasets, TRL, PEFT, bitsandbytes, Unsloth, Hugging Face Hub client, and llama.cpp.
-- PyTorch and a verified PyTorch CUDA runtime; CUDA toolkit/compiler availability also remains unverified.
-- A local Qwen3-1.7B model cache, verified model download, and verified inference path.
-- A runnable local inference environment and cached Qwen3-1.7B checkpoint, benchmark tasks, baseline results, training data, trained checkpoints, and deployment artifacts.
-- Any verified cloud GPU access, account, credentials, or allocation.
-
-No model dependencies were installed, and no benchmark or model result has been generated. Parser and agent-loop unit tests use scripted mock responses, not model results.
+The benchmark is small, shares one synthetic mini-application, and uses narrow
+validators. Task-level separation is not repository-level separation. Contract
+scores do not guarantee factual answer quality; the trace review documents a
+counterexample. Support results are from known tasks and are not generalization
+evidence. The shell layer is a workspace-scoped guardrail, not an OS security
+sandbox. No production safety or autonomous coding guarantee is claimed.

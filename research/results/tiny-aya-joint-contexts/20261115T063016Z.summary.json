@@ -1,0 +1,84 @@
+{
+  "run_id": "20261115T063016Z",
+  "context_count": 15,
+  "prediction_count": 30,
+  "metrics": {
+    "base": {
+      "prediction_count": 15,
+      "schema_valid": 15,
+      "tool_name_matches": 1,
+      "exact_action_matches": 1,
+      "teacher_forced_exact": 0,
+      "mean_action_token_accuracy": 0.8668623883601069,
+      "mean_action_nll": 0.8105729907751084,
+      "generated_tokens": 529,
+      "cap_hits": 0,
+      "by_expected_tool": {
+        "finish": {
+          "count": 4,
+          "tool_name_matches": 0,
+          "exact_action_matches": 0,
+          "schema_valid": 4
+        },
+        "read_file": {
+          "count": 2,
+          "tool_name_matches": 0,
+          "exact_action_matches": 0,
+          "schema_valid": 2
+        },
+        "shell": {
+          "count": 6,
+          "tool_name_matches": 1,
+          "exact_action_matches": 1,
+          "schema_valid": 6
+        },
+        "write_file": {
+          "count": 3,
+          "tool_name_matches": 0,
+          "exact_action_matches": 0,
+          "schema_valid": 3
+        }
+      }
+    },
+    "adapter": {
+      "prediction_count": 15,
+      "schema_valid": 14,
+      "tool_name_matches": 8,
+      "exact_action_matches": 3,
+      "teacher_forced_exact": 0,
+      "mean_action_token_accuracy": 0.8753227767562339,
+      "mean_action_nll": 0.7540387650330861,
+      "generated_tokens": 889,
+      "cap_hits": 0,
+      "by_expected_tool": {
+        "finish": {
+          "count": 4,
+          "tool_name_matches": 0,
+          "exact_action_matches": 0,
+          "schema_valid": 4
+        },
+        "read_file": {
+          "count": 2,
+          "tool_name_matches": 0,
+          "exact_action_matches": 0,
+          "schema_valid": 2
+        },
+        "shell": {
+          "count": 6,
+          "tool_name_matches": 6,
+          "exact_action_matches": 3,
+          "schema_valid": 6
+        },
+        "write_file": {
+          "count": 3,
+          "tool_name_matches": 2,
+          "exact_action_matches": 0,
+          "schema_valid": 2
+        }
+      }
+    }
+  },
+  "training_performed": false,
+  "tool_execution_performed": false,
+  "heldout_accessed": false
+}

@@ -1,0 +1,78 @@
+{
+  "run_id": "20261115T071710Z",
+  "task_ids": [
+    "B005",
+    "B010",
+    "B015",
+    "B020",
+    "B025",
+    "B030",
+    "B035",
+    "B040",
+    "B045",
+    "B050"
+  ],
+  "record_ids": [
+    "base:B005",
+    "base:B010",
+    "base:B015",
+    "base:B020",
+    "base:B025",
+    "base:B030",
+    "base:B035",
+    "base:B040",
+    "base:B045",
+    "base:B050",
+    "adapter:B005",
+    "adapter:B010",
+    "adapter:B015",
+    "adapter:B020",
+    "adapter:B025",
+    "adapter:B030",
+    "adapter:B035",
+    "adapter:B040",
+    "adapter:B045",
+    "adapter:B050"
+  ],
+  "metrics": {
+    "base": {
+      "task_count": 10,
+      "successful_tasks": 1,
+      "task_success_rate": 0.1,
+      "tool_selection_accuracy": 0.3125,
+      "argument_schema_validity": 0.9411764705882353,
+      "invalid_tool_call_rate": 0.058823529411764705,
+      "average_tool_steps_per_task": 1.3,
+      "average_model_turns_per_task": 2.6,
+      "average_tokens_per_task": 4112.8,
+      "average_latency_seconds": 6.9263739,
+      "failure_categories": {
+        "invalid_tool_call": 1,
+        "task_contract_failure": 3,
+        "validation_failure": 5
+      }
+    },
+    "adapter": {
+      "task_count": 10,
+      "successful_tasks": 2,
+      "task_success_rate": 0.2,
+      "tool_selection_accuracy": 0.35714285714285715,
+      "argument_schema_validity": 0.9473684210526315,
+      "invalid_tool_call_rate": 0.05263157894736842,
+      "average_tool_steps_per_task": 1.1,
+      "average_model_turns_per_task": 2.8,
+      "average_tokens_per_task": 4471.8,
+      "average_latency_seconds": 10.6410785,
+      "failure_categories": {
+        "invalid_tool_call": 1,
+        "task_contract_failure": 3,
+        "validation_failure": 4
+      }
+    }
+  },
+  "contract_success_rate_delta": 0.1,
+  "heldout_accessed": true,
+  "training_performed": false,
+  "factual_review_required": true,
+  "interpretation": "Fresh matched held-out comparison; contract success is deterministic benchmark success, not unrestricted coding reliability."
+}

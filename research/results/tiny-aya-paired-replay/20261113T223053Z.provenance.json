@@ -1,0 +1,20 @@
+{
+  "job_id": "6af78e8223985fb9cd809537",
+  "failed_setup_job_id": "6af78ca523985fb9cd80921d",
+  "source_log": "research/results/tiny-aya-paired-replay/20261113T222604Z.log",
+  "source_log_sha256": "8fa62098c214f21bd181701b461b800ac329b5450614d2b6a88c8911d1b13955",
+  "all_eight_records_recovered": true,
+  "summary_recomputed_matches": true,
+  "first_prompts_equal_for_each_pair": true,
+  "config_sha256": "565a2215cd51afbb956fd397fb8162a691a1d857cc957f864f9d3dfe47f648e4",
+  "heldout_accessed": false,
+  "verified_code_edits": {
+    "base": 0,
+    "adapter": 0
+  },
+  "write_file_calls": {
+    "base": 0,
+    "adapter": 0
+  },
+  "review_method": "assistant trace audit; no owner approval of generated answers implied"
+}

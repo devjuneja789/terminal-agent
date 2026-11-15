@@ -1,0 +1,38 @@
+{
+  "all_48_records_recovered": true,
+  "aggregate_metrics_recomputed": true,
+  "base_metrics_identical_to_EXP011": true,
+  "all_16_label_boundaries_and_eos_checks_passed": true,
+  "weighted_primary_write_decisions": [
+    {
+      "task_id": "B021",
+      "gold_write_token_probability": 0.8081690073013306,
+      "gold_write_token_rank": 1,
+      "teacher_token_accuracy": 0.987012987012987,
+      "selected_tool": "write_file",
+      "hit_token_cap": false,
+      "ended_with_eos": true
+    },
+    {
+      "task_id": "B026",
+      "gold_write_token_probability": 0.2514324486255646,
+      "gold_write_token_rank": 3,
+      "teacher_token_accuracy": 0.9754601226993865,
+      "selected_tool": "read_file",
+      "hit_token_cap": false,
+      "ended_with_eos": true
+    },
+    {
+      "task_id": "B041",
+      "gold_write_token_probability": 0.6823024153709412,
+      "gold_write_token_rank": 1,
+      "teacher_token_accuracy": 1.0,
+      "selected_tool": "write_file",
+      "hit_token_cap": false,
+      "ended_with_eos": true
+    }
+  ],
+  "training_performed": false,
+  "heldout_accessed": false,
+  "owner_review_status": "assistant analysis only; no generated target approved"
+}

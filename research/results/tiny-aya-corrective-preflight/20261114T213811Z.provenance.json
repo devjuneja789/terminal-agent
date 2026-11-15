@@ -1,0 +1,17 @@
+{
+  "source_log": "research/results/tiny-aya-corrective-preflight/20261114T213618Z.log",
+  "source_log_sha256": "2c49ce7567a150f122012fe6909a2fc6df8de84f18624e49eab60f882756f7b8",
+  "all_27_records_recovered": true,
+  "source_files_sha256": {
+    "training/agenttune/corrective_preflight.py": "38a7e379412b89933db5b3bdb35bd9e52d873bce29de9b44ac11196186e4c984",
+    "training/agenttune/prepare_corrective_preflight.py": "c55f87c512bbb032e03064bd6c409558360c549295202ee142760fc770d56cef",
+    "training/agenttune/weighted_loss.py": "31aed4d80c73ff873e992ba8cfc2ac0643ccdea2133ab6bb72ece9c1816ab580",
+    "scripts/analyze_corrective_preflight.py": "a9843bb118832930fafe2aa9ce6284b7f3c0c4de96916607e92d51c01ac4bc59"
+  },
+  "job_id": "6af8d45b23985fb9cd829585",
+  "config_sha256": "036b0a86172b84843fe0ccb27f9bedfd8203a771ccde342f81faeabcea8696f4",
+  "rows_sha256": "03fc46a5cbfa41482ffbfda57ff8188bbfc761df998cc01a7f6e5bf0b803bb3b",
+  "all_legacy_controls_reproduced": true,
+  "all_candidate_prefix_checks_passed": true,
+  "upstream_eos_absent_before_first_chat_closing_in_all_controls": true
+}

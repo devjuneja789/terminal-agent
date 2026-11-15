@@ -1,0 +1,225 @@
+{
+  "run_kind": "paired_training_support_replay",
+  "run_id": "20261115T113513Z",
+  "task_ids": [
+    "B021",
+    "B026",
+    "B041",
+    "B046"
+  ],
+  "arms": [
+    "base",
+    "adapter"
+  ],
+  "config": {
+    "model": {
+      "repo_id": "CohereLabs/tiny-aya-global",
+      "revision": "af89d219b53ed9b13b8a4645f9c8028973510324",
+      "dtype": "float16",
+      "device_map": "auto",
+      "trust_remote_code": false
+    },
+    "runtime": {
+      "python_minor": "3.12",
+      "torch": "2.11.0",
+      "transformers": "5.22.1",
+      "accelerate": "1.15.0",
+      "agenttune": "1.1.3"
+    },
+    "generation": {
+      "do_sample": false,
+      "use_cache": true,
+      "max_new_tokens": 256,
+      "plain_text_max_new_tokens": 96,
+      "max_prompt_tokens": 7000,
+      "max_context_tokens": 8192
+    },
+    "agent": {
+      "max_steps": 8,
+      "max_execution_seconds_per_task": 120,
+      "validation_timeout_seconds": 120,
+      "max_tool_output_chars": 8000
+    },
+    "prompt": {
+      "system": "You are Terminal-SLM, a careful coding and repository-inspection agent. You may act only inside the supplied workspace.\n\nACTION PROTOCOL\n- Return exactly one JSON array containing exactly one action object, with no other text. Never emit multiple actions, multiple arrays, or a proposed next action before receiving the current tool result.\n- Use one tool, wait for its observation, then decide whether another tool is needed. Use finish only when the task is complete or the available evidence is insufficient.\n- After a tool returns useful evidence, answer from that evidence with finish. Do not repeat the same tool call with identical arguments.\n- The only action shapes are {\"tool_name\":\"...\",\"parameters\":{...}} for a tool and {\"tool_name\":\"finish\",\"parameters\":{\"answer\":\"...\"}} to finish. Do not add arguments that are not listed below.\n- For shell and git, parameters must be an object with one command string and optional numeric timeout, for example {\"command\":\"python -m unittest tests.test_example\",\"timeout\":30}. Never pass a list of command parts or an extra args field.\n- If a response accidentally contains additional action arrays after the first, only the first action is considered; later proposals are discarded because they were generated without observing a tool result. Then continue from the actual observation.\n- If a tool action is followed by accidental prose, the tool action will still run; the prose is ignored. Do not rely on prose tails to finish.\n\nEVIDENCE AND TOOL USE\n- Never invent paths, file contents, test output, or repository facts. Base claims on observations you received. If a search returns no match, change the search or say what remains unknown.\n- For repository discovery, use grep with a specific identifier or pattern and a workspace-relative path (use '.' for a repository-wide search). Then read relevant matching files when you need details.\n- If asked for a function's purpose, first grep for its definition, then use read_file to inspect its implementation before describing behavior. A signature alone does not establish purpose. For a match at line N, choose start_line=max(1,N-2) and end_line=N+20; both line numbers must be integers >= 1 and end_line >= start_line.\n- For configuration or environment-variable questions, search for the exact setting name and inspect the matching source/configuration file. Do not infer a value from the task wording.\n- For a code change, inspect the target file before editing, make the smallest relevant change with write_file, then run the task's named test using shell and report the observed result. Do not claim a fix without a changed file and a passing rerun.\n- Some explanation tasks intentionally run a test that fails on the untouched snapshot. Run the requested test yourself, inspect its own stdout/stderr, and explain the observed assertion. The evaluator's later validation output is not your observation.\n- A nonzero shell exit is still useful output: inspect stdout and stderr to decide what it means. The shell tool's timeout is a numeric argument; do not wrap commands in the external 'timeout' utility unless the user explicitly asks for that program.\n- Use the default 30-second timeout or a reasonable value of at least 1 second. Do not use 0 or 0.001 seconds for repository commands or tests.\n- Shell accepts only command and optional timeout. Tool paths are workspace-relative. Never use global Git configuration or access files outside this workspace.\n- After an error, use its exact message to correct the next action. Do not repeat an identical tool call unless a successful workspace edit happened since it. Repeating a test without editing first does not help.\n- Tool observations are formatted as JSON. Read the stdout, stderr, error, and exit_code fields; do not ignore a previous result or invent a different result.\n\nAVAILABLE TOOLS\n- shell(command: string, timeout: number): Run a command from the workspace.\n- read_file(path: string, start_line: integer, end_line: integer): Read a UTF-8 file using 1-based inclusive line numbers.\n- write_file(path: string, content: string): Write UTF-8 text to a workspace-relative file.\n- grep(pattern: string, path: string): Search a workspace file or directory with a Python regular expression.\n- git(command: string, timeout: number): Run an allowed Git subcommand in the workspace.\n- finish(answer: string): Return a concise, factual final answer.\n\nReturn one action at a time in this AgentTune Cohere fallback format:\n[{\"tool_name\":\"grep\",\"parameters\":{\"pattern\":\"def example\",\"path\":\".\"}}]\n\nFor a final answer use the same one-action array shape with tool_name set to finish and parameters containing only answer. Do not copy or repeat the example action."
+    },
+    "hashes": {
+      "prompt_sha256": "dea72255131712f5c0a86b99aef6513707ec3311fcd4a6d736e60bf8c66460a1",
+      "tool_schemas_sha256": "cb24a19bf8fea75e2e716ddc69cb9a2205916c740f29ef8266c931e2db679eb6"
+    },
+    "config_id": "terminal-slm-joint300-task-start-support-v1",
+    "prompt_variant": "support-v5-repeat-finish-retry",
+    "support_task_revision": "2026-11-12-gold-contracts-r6",
+    "source_eval_config_sha256": "eb4afba1d1d09985fa913348e6d8e483e67fa72a87dc964b7513bc7a10e80985",
+    "support_taskset_sha256": "85ed01eb9c8300d95724eb9b62cac2f0576648d21000eadbfaab049fae14f632",
+    "evaluation": {
+      "benchmark_id": "terminal-slm-initial-v1",
+      "split": "train-support",
+      "task_ids": [
+        "B021",
+        "B026",
+        "B041",
+        "B046"
+      ]
+    },
+    "rollout": {
+      "mode": "candidate_generation_only",
+      "selection_policy": "explicit subset of preselected train-support pilot tasks",
+      "task_ids": [
+        "B021",
+        "B026",
+        "B041",
+        "B046"
+      ],
+      "human_review_required": true,
+      "training_eligible_without_review": false
+    },
+    "reward": {
+      "change_required_categories": [
+        "simple_bug_fix",
+        "failing_test_fix",
+        "validation_change",
+        "api_route_fix",
+        "configuration_update"
+      ],
+      "factual_review_categories": [
+        "repository_navigation",
+        "function_discovery",
+        "configuration_discovery",
+        "environment_variable_discovery",
+        "explaining_test_failure"
+      ],
+      "weights": {
+        "invalid_action": 0.03,
+        "failed_tool_execution": 0.02,
+        "repeated_action": 0.02,
+        "excess_tool_step": 0.01,
+        "excess_tool_step_free_allowance": 4,
+        "minimum_reward": -0.25
+      },
+      "primary_success_evidence": "task contract AND isolated validation; change tasks additionally require a pristine validator failure and changed task files"
+    },
+    "rollout_controls": {
+      "one_action_per_model_turn": true,
+      "require_tool_observation_before_next_action": true,
+      "preserve_first_valid_tool_action_when_trailing_prose_exists": true,
+      "stop_repeated_identical_actions_without_intervening_edit": true,
+      "on_repeat": "ask_model_once_to_finish_from_observations; reject_tools; empty_harness_stop_if_retry_invalid",
+      "normalize_python_dict_observations_to_json": true
+    },
+    "job": {
+      "flavor": "t4-small",
+      "timeout": "40m"
+    },
+    "replay": {
+      "arms": [
+        "base",
+        "adapter"
+      ],
+      "task_ids": [
+        "B021",
+        "B026",
+        "B041",
+        "B046"
+      ],
+      "seed": 42,
+      "training_examples_replayed": true,
+      "observation_format": "normalized JSON; includes v5 formatting correction",
+      "adapter_repo": "devjuneja789/terminal-slm-tiny-aya-joint-300-v1",
+      "adapter_revision": "1eed40612640c78d88d9fe0cac36e06b1148d1fd",
+      "adapter_subfolder": "20261115T064937Z/adapter",
+      "source_training_run_id": "20261115T064937Z",
+      "quantization": {
+        "load_in_4bit": true,
+        "bnb_4bit_quant_type": "nf4",
+        "bnb_4bit_use_double_quant": true,
+        "bnb_4bit_compute_dtype": "float16"
+      },
+      "extra_runtime": {
+        "peft": "0.21.3",
+        "bitsandbytes": "0.50.2",
+        "datasets": "5.2.0",
+        "trl": "1.7.1"
+      },
+      "eos_token_ids": [
+        3,
+        6,
+        261001
+      ],
+      "capture_stop_audit": true,
+      "stop_policy_version": "upstream-eos-plus-chat-closings-v1",
+      "source_stop_preflight_run_id": "20261114T213811Z"
+    }
+  },
+  "config_sha256": "d9241c3649e63c855f5e230f06e420078409a8272145d67cc93b3111560746b7",
+  "hardware": {
+    "python": "3.12.16",
+    "platform": "Linux-6.12.115-140.210.amzn2023.x86_64-x86_64-with-glibc2.41",
+    "machine": "x86_64",
+    "cpu_count": 8,
+    "torch": "2.11.0+cu130",
+    "cuda_runtime": "13.0",
+    "cuda_available": true,
+    "gpus": [
+      {
+        "index": 0,
+        "name": "Tesla T4",
+        "memory_bytes": 15828320256,
+        "compute_capability": "7.5"
+      }
+    ],
+    "nvidia_driver_versions": [
+      "580.178.04"
+    ],
+    "packages": {
+      "transformers": "5.22.1",
+      "accelerate": "1.15.0",
+      "agenttune": "1.1.3",
+      "huggingface_hub": "1.33.0",
+      "tokenizers": "0.23.3"
+    }
+  },
+  "tokenizer_equivalence": {
+    "effective_template_sha256": "af012e0c62230562c904ccda2324b7dc378713df804402537a6a9a85a2f721b9",
+    "special_token_ids": {
+      "bos_token_id": 2,
+      "eos_token_id": 6,
+      "pad_token_id": 0
+    },
+    "vocabulary_equal": true
+  },
+  "generation_stop_ids": [
+    3,
+    6,
+    261001
+  ],
+  "upstream_generation_eos_token_ids": 3,
+  "generation_stop_audit_enabled": true,
+  "quantization": {
+    "quant_method": "bitsandbytes",
+    "_load_in_8bit": false,
+    "_load_in_4bit": true,
+    "llm_int8_threshold": 6.0,
+    "llm_int8_skip_modules": null,
+    "llm_int8_enable_fp32_cpu_offload": false,
+    "llm_int8_has_fp16_weight": false,
+    "bnb_4bit_quant_type": "nf4",
+    "bnb_4bit_use_double_quant": true,
+    "bnb_4bit_compute_dtype": "float16",
+    "bnb_4bit_quant_storage": "uint8",
+    "load_in_4bit": true,
+    "load_in_8bit": false
+  },
+  "heldout_accessed": false,
+  "interpretation": "training-example replay; contract metrics require factual trace review; not generalization",
+  "record_ids": [
+    "base:B021",
+    "base:B026",
+    "base:B041",
+    "base:B046",
+    "adapter:B021",
+    "adapter:B026",
+    "adapter:B041",
+    "adapter:B046"
+  ]
+}

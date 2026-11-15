@@ -1,0 +1,17 @@
+{
+  "adapters_differ": true,
+  "artifacts": [
+    {
+      "repo": "devjuneja789/terminal-slm-tiny-aya-tool-choice-60-v1",
+      "revision": "2bb02aafefcfcb5de5a4c79737c8cbb20dd6a0d9",
+      "path": "20261115T055053Z/adapter/adapter_model.safetensors",
+      "sha256": "bce0b7f795f4d48ba1df4cd572afd1901581949dff78c43fec1b0c280d55fb05"
+    },
+    {
+      "repo": "devjuneja789/terminal-slm-tiny-aya-joint-60-v1",
+      "revision": "36f7fecf593e523ca18b910d635465533a9a0e41",
+      "path": "20261115T062137Z/adapter/adapter_model.safetensors",
+      "sha256": "8e3adeb1011c708b1f2ada5608af7a5fdfc16076de5759b72df437a10e5150cf"
+    }
+  ]
+}

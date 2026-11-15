@@ -28,3 +28,37 @@ checkpoints/
 
 # Verbose Hugging Face Job console logs (structured results are tracked)
 research/results/tiny-aya-baseline/*.log
+research/results/tiny-aya-support-rollouts/*.log
+research/results/tiny-aya-sft-smoke/*.log
+research/results/tiny-aya-paired-replay/*.log
+research/results/tiny-aya-memorization/*.log
+research/results/tiny-aya-memorization-replay/*.log
+research/results/tiny-aya-action-diagnostic/*.log
+research/results/tiny-aya-weighted-sft/*.log
+research/results/tiny-aya-weighted-replay/*.log
+research/results/tiny-aya-source-preservation/*.log
+research/results/tiny-aya-observation-intervention/*.log
+research/results/tiny-aya-observation-metadata/*.log
+research/results/tiny-aya-corrective-preflight/*.log
+research/results/tiny-aya-native-stop-replay/*.log
+research/results/tiny-aya-corrective-sft/*.log
+research/results/tiny-aya-corrective-replay/*.log
+research/results/tiny-aya-corrective-contexts/*.log
+research/results/tiny-aya-tool-choice-sft/*.log
+research/results/tiny-aya-tool-choice-contexts/*.log
+research/results/tiny-aya-joint-sft/*.log
+research/results/tiny-aya-joint-contexts/*.log
+research/results/tiny-aya-fit300/*.log
+research/results/tiny-aya-fit300-contexts/*.log
+research/results/tiny-aya-final-heldout/*.log
+research/results/tiny-aya-fit300-support/*.log
+research/results/tiny-aya-task-start-sft/*.log
+research/results/tiny-aya-task-start-replay/*.log
+
+# Duplicated HF upload payloads; canonical evidence and manifest remain tracked
+submission/release/
+
+# Superseded local-model prototype trajectories removed from the active project
+research/results/manual_smoke_*.jsonl
+evals/benchmark/results/held-out-eval/run_20261016*
+evals/benchmark/results/train-support/run_202610*

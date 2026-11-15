@@ -1,0 +1,119 @@
+{
+  "kind": "approved_reference_revalidation",
+  "heldout_accessed": false,
+  "model_inference": false,
+  "not_model_evaluation": true,
+  "checks": [
+    {
+      "example_id": "G-B021-v1",
+      "named": {
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "tests.test_contracts.Contracts.test_page_size_lower_bound"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ".\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+        "timed_out": false,
+        "apply_error": null,
+        "changed_files": [
+          "shop/config.py"
+        ],
+        "passed": true
+      },
+      "upper_bound": {
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "tests.test_contracts.Contracts.test_page_size_upper_bound"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ".\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+        "timed_out": false,
+        "apply_error": null,
+        "changed_files": [
+          "shop/config.py"
+        ],
+        "passed": true
+      }
+    },
+    {
+      "example_id": "G-B026-v1",
+      "named": {
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "tests.test_contracts.Contracts.test_timeout_from_environment"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ".\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+        "timed_out": false,
+        "apply_error": null,
+        "changed_files": [
+          "shop/config.py"
+        ],
+        "passed": true
+      },
+      "upper_bound": {
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "tests.test_contracts.Contracts.test_page_size_upper_bound"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ".\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+        "timed_out": false,
+        "apply_error": null,
+        "changed_files": [
+          "shop/config.py"
+        ],
+        "passed": true
+      }
+    },
+    {
+      "example_id": "G-B041-v1",
+      "named": {
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "tests.test_contracts.Contracts.test_timeout_default"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ".\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+        "timed_out": false,
+        "apply_error": null,
+        "changed_files": [
+          "shop/config.py"
+        ],
+        "passed": true
+      },
+      "upper_bound": {
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "tests.test_contracts.Contracts.test_page_size_upper_bound"
+        ],
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ".\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+        "timed_out": false,
+        "apply_error": null,
+        "changed_files": [
+          "shop/config.py"
+        ],
+        "passed": true
+      }
+    }
+  ]
+}

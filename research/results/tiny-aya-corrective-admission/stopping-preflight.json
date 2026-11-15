@@ -1,0 +1,62 @@
+{
+  "kind": "static_stopping_preflight_finding",
+  "model_revision": "af89d219b53ed9b13b8a4645f9c8028973510324",
+  "tokenizer_config_sha256": "fb56a3ef7659346aae196a2ab877355f1e7fd871c36843f709bb2e23c606d972",
+  "tokenizer_eos_token": "<|END_OF_TURN_TOKEN|>",
+  "turn_end_id": 6,
+  "turn_end_token": "<|END_OF_TURN_TOKEN|>",
+  "response_end_id": 261001,
+  "response_end_token": "<|END_RESPONSE|>",
+  "assistant_template_suffix_contains_response_then_turn_end": true,
+  "runner_overrides_stop_with_tokenizer_eos_only": true,
+  "runner_source": "training/agenttune/observation_intervention.py",
+  "runner_sha256": "8e0c715e2f193fedd5f64a5b4cb64724a30cb37d3e31d0a5dbfbbc24247702ac",
+  "saved_predictions_sha256": "1f11eec4b52f64290586bbee58fe20f7d048fda4e35aec4d1b91928fc5bc9438",
+  "base_outputs": [
+    {
+      "record_id": "base:B021:original",
+      "response_end_token_count": 50,
+      "hit_token_cap": true,
+      "ended_with_eos": false
+    },
+    {
+      "record_id": "base:B021:full_source",
+      "response_end_token_count": 212,
+      "hit_token_cap": true,
+      "ended_with_eos": false
+    },
+    {
+      "record_id": "base:B026:original",
+      "response_end_token_count": 219,
+      "hit_token_cap": true,
+      "ended_with_eos": false
+    },
+    {
+      "record_id": "base:B026:full_source",
+      "response_end_token_count": 219,
+      "hit_token_cap": true,
+      "ended_with_eos": false
+    },
+    {
+      "record_id": "base:B041:original",
+      "response_end_token_count": 212,
+      "hit_token_cap": true,
+      "ended_with_eos": false
+    },
+    {
+      "record_id": "base:B041:full_source",
+      "response_end_token_count": 212,
+      "hit_token_cap": true,
+      "ended_with_eos": false
+    }
+  ],
+  "local_versions": {
+    "transformers": "5.19.0",
+    "torch": "2.14.0+cu126"
+  },
+  "pinned_training_transformers": "5.22.1",
+  "model_loaded": false,
+  "new_inference_performed": false,
+  "frozen_configs_changed": false,
+  "next_gate": "Verify official generation settings and both closing tokens in pinned cloud preflight before training. This does not establish a task-success improvement."
+}

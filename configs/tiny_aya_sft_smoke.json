@@ -1,0 +1,12 @@
+{
+  "config_id": "terminal-slm-approved-sft-smoke-v2-fp32-adapters",
+  "model_id": "CohereLabs/tiny-aya-global",
+  "model_revision": "af89d219b53ed9b13b8a4645f9c8028973510324",
+  "agenttune_commit": "d4db4c12d52342227c4113a70183d0f64aa2f345",
+  "max_steps": 8,
+  "max_length": 4096,
+  "learning_rate": 0.0001,
+  "lora_rank": 8,
+  "seed": 42,
+  "artifact_repo": null
+}

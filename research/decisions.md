@@ -1,83 +1,444 @@
 # Research decisions
 
-This file records project decisions and their rationale. Phases A1–A4 establish the tool boundary, native model/tool-call interface, bounded execution loop, and CLI. The manual Qwen3 smoke gate is prepared but blocked on local inference prerequisites; benchmark and training decisions remain open.
+## Submission candidate frozen; final matched evaluation (2026-11-15)
 
-> Historical note: the initial paragraphs below describe the original Qwen3 plan. The active hackathon pivot and current phase status are recorded in `HACKATHON-PIVOT-TRACK-3.md` and EXP-003.
+- The user approved the submission-day plan: one final fixed 300-update/20-epoch
+  support-only fit, then candidate freeze and final matched evaluation. Same
+  15 admitted targets, fresh base, joint objective, optimizer, seed, quantization
+  and AMP settings as EXP-023; the linear schedule stretches with the horizon.
+  No objective sweep or new data. Training and reload pass all checks.
+- EXP-024's exact-context audit passes all lineage/token/weight/control checks.
+  Joint-300 reaches 15/15 correct choices, 4/4 finish choices, 6/15 exact actions
+  and 15/15 schema-valid outputs, against joint-60's 8/15, 0/4, 3/15 and 14/15.
+  It wins the preregistered support-only tuple and is frozen at 07:14:40 UTC,
+  artifact `1eed40612640c78d88d9fe0cac36e06b1148d1fd`. Do not overwrite the
+  freeze or train again after held-out inspection. Correct choices are not
+  executable task success; argument and answer mismatches persist.
+- EXP-025 reruns both untouched base and selected adapter on all ten permanent
+  held-out tasks with identical native-stop/NF4/v5 settings. The historical
+  FP16/v1 baseline remains historical. Verify task bytes against Git; no
+  held-out task/validator changes. Stage no training data and generate no rewards.
+  Job `6af95c1129dd05ff0368583f` completed as run `20261115T071710Z`.
+  Matched contract passes are 1/10 versus 2/10, but the additional B050 pass
+  contains factual errors. Both models complete 0/5 repairs and make no file
+  changes. Keep the nominal metric and trace counterexample together; no
+  reliable end-to-end gain is claimed and no benchmark label is changed.
+- AuditKIT is a real pinned core integration at commit
+  `9d4e21bac240e8108a22c2c137d179d6070868d5`, installed version 1.1.12.
+  Import actual AgentTune EventLogs into its recorded AgentEvalRunner; recompute
+  the contract from recorded validator and tool evidence. This is offline
+  auditing, not new model/tool execution or a judge API. Emitted-action structural
+  scores have a different denominator from rejected-attempt harness metrics.
+- Prepare public code, attributed adapter cards, explicit data/log payloads,
+  provenance and a recorded walkthrough before owner release review. No base
+  weights are redistributed; no live inference is implied by the demo.
 
-## Initial direction
+## Joint decision/completion experiment completed (2026-11-15)
 
-- **Starting model:** `Qwen/Qwen3-1.7B`.
-- **Target behavior:** reliable use of a constrained terminal/tool interface for executable coding tasks.
-- **Evaluation:** compare the unmodified model and adapted checkpoints using an executable benchmark with objective success checks.
-- **Training:** QLoRA SFT is the planned first training method; DPO and GRPO remain optional and depend on evidence, data, and compute.
-- **Compute split:** local machine for development, evaluation, and quantized inference; cloud GPU for training.
-- **Current status:** A1–A4 are implemented and covered by unit tests. The five-task manual smoke runner is implemented. A local checkpoint loaded on 2026-10-16, but generation failed because the client treated Transformers `BatchEncoding` as a tensor. The client now passes the encoded mapping to `generate`; the manual smoke gate still needs a successful rerun. The formal benchmark and training remain incomplete.
+- The user authorizes necessary project commands and HF job submissions.
+  Scope each run with a fixed data/config/budget and private artifact destination;
+  no rerun of an already populated adapter repository or unbounded training.
+- EXP-023 keeps the same 15 admitted targets, fresh base and 60 updates at
+  scale 256. Optimize 0.75 first native tool-name-token CE plus 0.25 normalized
+  weighted full-completion CE; all argument/code/closing coefficients positive.
+  No text, schema, prompts or model initialization changed.
+- All real gradient, effective coefficient, update and reload gates pass. The
+  complete exact-context comparison recovers all 45 records and reproduces all
+  base controls. New adapter greedy outputs and teacher top-1 arrays match
+  EXP-022 on all 15 contexts: choices 8/15, writes 2/3, finish 0/4, exact 3/15.
+- Full-action NLL improves 0.785→0.754 without changing decisions. Hub LFS file
+  hashes differ and the loader pins the new artifact, so do not confuse stable
+  argmax outputs with accidental checkpoint reuse. No task-success gain.
+- Primary choice and schema goals fail. Stop without agent/held-out evaluation
+  or further automatic training/data admission. A future fixed fit-budget
+  diagnostic may clarify insufficient optimization; current evidence does not
+  establish a capacity limit or justify more unbounded objective changes.
 
-## Phase A1 design decisions
+## Tool-choice/finish isolation completed (2026-11-15)
 
-- **One explicit workspace per toolbox:** file tools accept only workspace-relative paths and verify resolved paths remain inside the workspace, including symlinks. The home directory itself and any ancestor of it cannot be selected as the workspace root.
-- **Temporary default:** omitting a workspace creates a new temporary directory. It does not default to the process cwd or the user's home directory.
-- **Typed result envelope:** all tools return `ToolResult` with success, stdout, stderr, exit status, error, truncation flags, and metadata; `as_dict()` provides a serialization boundary.
-- **Bounded subprocesses:** shell and Git use a 30-second default timeout (maximum 300 seconds), separate 64 KiB output limits, no inherited stdin, and process-group termination on timeout.
-- **Filtered child environment:** only selected locale/terminal/path values pass through; home, temp, XDG, and Git config locations resolve within the workspace. Git discovery is prevented from walking above the workspace parent, network subcommands are denied, and only a small built-in subcommand set is exposed.
-- **Command audit:** shell and Git invocations are recorded as JSONL in `.terminal-slm/tool.log.jsonl` inside the workspace.
-- **No extra runtime dependencies:** the Phase A1 tool layer uses Python's standard library and is exercised with `unittest`.
-- **Safety limit:** the shell has a pinned cwd and conservative command checks, but it is not a kernel/container sandbox. The future agent loop must enforce the workspace policy and avoid treating untrusted model output as safe.
+- EXP-022 retains the four admitted references/15 targets, fresh base and
+  60-update/four-epoch budget. Optimize only native tool_name value tokens,
+  including finish. Preserve full reviewed templates and label-presence audits,
+  but explicitly record zero effective loss on arguments/code/native closings.
+  Retained labels are not equivalent to effective optimizer supervision.
+- The scale-8192 startup aborts at the first skipped AMP update, with zero
+  optimizer updates and no trained artifact. Retain raw failure and v1 profile.
+  Correct the numerical startup in v2 to fixed scale 256 with an all-15-batch
+  checkpointed-gradient probe before optimizer creation; no scale search,
+  objective/LR/data/initialization change or training-budget extension.
+- Dummy-logit isolation and real gradient probes pass. Corrected training
+  completes all 60 updates, zero skips, changed/reloaded FP32 adapters. Tool
+  loss falls 1.408→0.518 across epochs; do not compare this numerically with
+  full-completion loss. The AMP change is a disclosed numerical-control caveat.
+- Repeat EXP-021's exact inference procedure on base/new adapter. All 15 base
+  token outputs and teacher top-1 arrays reproduce, and all 45 records/label/
+  effective-weight/native-stop audits pass. Valid tool choices improve 6→8/15,
+  write choices 0→2/3, exact actions remain 3/15; finish 0/4 and read 0/2.
+  Primary 15/15 choice criterion is not met. Schema validity falls to 14/15.
+- All three write-target raw outputs attempt write_file; count B026 malformed
+  JSON as invalid. B021 edits the wrong constant; B041 retains functions and
+  changes default 15 but drops header/import. No writes/tests execute here,
+  so static file proposals are not benchmark passes or completed repairs.
+- Stop without a full-agent replay, longer run or new target admission. Read/
+  finish transitions and edit arguments remain unresolved; concentrated
+  tool-name loss alone is not a demonstrated agent improvement.
 
-## Phase A2 model and protocol decisions
+## Exact corrective-context predictions completed (2026-11-14)
 
-- **Keep model inference separate from tool orchestration:** `ModelClient` accepts conversation messages and standard tool schemas and returns raw assistant text. The model client does not validate or execute tool calls.
-- **Use Qwen3's native tool-call format:** parse `<tool_call>{"name": ..., "arguments": {...}}</tool_call>` directly rather than introducing a project-specific syntax. This keeps the base model, future SFT traces, and later local deployment aligned with the format in the project plan.
-- **Use standard OpenAI-style tool schemas as model input:** the five existing workspace tools have JSON parameter schemas in `tools/definitions.py`, separate from inference and execution. This is the schema interface expected by the tokenizer chat template and other compatible runtimes.
-- **Validate before execution:** the parser validates all blocks in an assistant response (JSON shape, known tool, required and allowed fields, argument types and ranges) before returning calls. The executor repeats validation at the execution boundary. An invalid later block therefore cannot partially execute an earlier call from the same response.
-- **Sequential loop:** each model turn may return one or more ordered tool calls. The loop executes them in order, appends native `tool` role results, and then asks the model for the next turn. A response with no tool-call block ends the interaction as normal assistant text.
-- **Start with local Transformers, without implicit downloads:** `LocalTransformersClient` uses the Qwen3 tokenizer's own chat template with the tool schemas and returns raw decoded text. Imports/model loading are lazy, and `local_files_only=True` is the default. A local model runtime and checkpoint are not present in the inspected environment, so real inference remains unverified.
-- **No remote client yet:** a remote OpenAI-compatible adapter is unnecessary to test the interface; tests use a fake in-process `ModelClient`.
-- **No training or benchmark work in A2:** tests verify parsing/orchestration behavior only and are not model evaluation results.
+- EXP-021 stages only the four admitted references, 15 exact targets and the
+  completed EXP-020 training audit. Reproduce every prompt/target token ID,
+  label position/count and weight before model inference. No trainer, optimizer,
+  backward, terminal tools, benchmark snapshots or held-out tasks enter the run.
+- Thirty base/adapter predictions share pinned NF4/FP16/eager greedy inference,
+  seed 42, 256-token limit and native stops. All 15 context reproductions and
+  30 native-stop audits pass; all 45 records recover without another GPU run.
+- Adapter exact actions improve 1/15→3/15 and tool-name matches 1/15→6/15.
+  All three exact predictions are primary test commands. All six shell targets
+  choose shell, but three repeat the primary test instead of the upper-bound
+  regression test. Read targets 0/2, write targets 0/3, finish targets 0/4.
+- All predictions are strict-schema-valid. Wrong action transitions persist
+  even with exact reviewed contexts: repeated reads before writes, test calls
+  instead of complete reads, and extra commands instead of finishing. No write
+  or final-answer predictions exist to credit as file preservation/paraphrases.
+- Teacher token accuracy rises 86.69%→89.64% and NLL falls 0.811→0.528,
+  but gold-context token scores do not substitute for correct greedy actions.
+  Missing runtime coverage cannot be the sole explanation of full-loop failure.
+  This does not prove a model-capacity limit or a specific optimization cause.
+- Stop after the diagnostic; no new targets admitted and no training follows.
+  Next proposed experiment: isolate critical tool-choice/finish learning on the
+  same approved targets under a fixed versioned plan before more agent replays.
 
-## Phase A3 loop and state decisions
+## Bounded corrective SFT and support replay completed (2026-11-14)
 
-- **Keep the loop deterministic:** one model response is parsed, all calls in that response are validated, and calls execute in emitted order. Results are appended as tool messages before the next inference.
-- **Bound run resources:** `AgentConfig` caps tool calls, elapsed time, total conversation characters, and each serialized tool observation. The model and shell/Git tools receive the remaining time budget where supported; after a deadline, the loop starts no further action.
-- **Return explicit stop states:** completion, tool-call limit, execution timeout, conversation limit, malformed tool call, and model failure are represented distinctly. Tool failures become observations so the model can recover; parser validation failures stop before execution.
-- **Record a timestamped trajectory:** the trace stores the user request, each raw model response, each tool name and arguments, bounded tool results, timestamps, final response, and stop reason. Truncation is marked in the event/result.
-- **No planning or persistent memory:** conversation state is limited to the current task and is discarded with the run result unless a caller stores its trajectory.
-- **Timeout limitation:** Python operations such as file reads and grep cannot be forcibly interrupted safely. The loop checks the deadline between operations; subprocess tools and model clients are expected to honor the remaining-time contract.
+- EXP-020 starts a fresh LoRA from the pinned base on exactly 15 admitted
+  corrective continuations: 60 updates/four epochs, unchanged weighted loss,
+  no old-gold merge, audit-only targets or supervision of archived prefixes.
+  A separate cloud staging path verifies admission hashes and both passed
+  preflight/runtime gates; actual trainer masks/closings/weights are rechecked.
+- AgentTune transcript export must round-trip exactly. Its factory selects
+  explicit continuation indices, rather than extracting every assistant turn.
+  Both audit-only reports and all creation-time review artifacts stay unchanged.
+- All 60 updates complete, zero skipped steps, finite loss, FP32 trainable
+  adapters, maximum length 2490/4096, successful private save/reload. Epoch
+  mean weighted loss falls 0.807→0.521. This is pipeline/learning-loss evidence,
+  not an agent-success claim.
+- Compare fresh base and the new adapter under the validated native-stop
+  profile; only replay version/adapter identity differ from EXP-019. Both
+  score 0/4, no edits. New adapter schema validity is 83.33%, versus the old
+  weighted adapter's 100%; no cumulative gain is claimed. Thirty generations
+  use the union; 29 close normally and one reaches the unchanged token cap.
+- Preserve false success claims and malformed calls. Discarded trailing shell
+  proposals are not executed edits. B046's intentional failing test remains
+  valid evidence; partial causal explanation does not pass its fixed contract.
+- Zero task-opening targets and zero exact training-prompt visits suggest a
+  coverage gap, without proving causality. Stop after the fixed experiment.
+  Next: conditional predictions on the exact reviewed contexts before changing
+  data, initialization or training budget. No held-out access or output admission.
 
-## Decisions to resolve before later phases
+## Versioned native-stop support replay completed (2026-11-14)
 
-- Decide whether the current shell guardrails are sufficient or need stronger OS-level isolation.
-- Define tool approval/denial behavior, token/turn limits, and interruption handling.
-- Install and pin a local inference runtime, confirm model artifact access, and run a real smoke inference before baseline evaluation.
-- Define benchmark task format, success criteria, and result-recording format before generating data or reporting metrics.
-- Pin the development/inference environment after checking compatibility on the actual target machines; keep training dependencies separate and target a verified cloud GPU.
+- EXP-019 runs the existing base/weighted adapter on the same four support tasks
+  with native union `[3,6,261001]` in both arms. All historical config fields,
+  task contracts, snapshots, validators and initial prompts match EXP-012;
+  only the version and opt-in stop/telemetry fields differ.
+- All 38 generations use the union and end once on END_RESPONSE, with zero
+  cap hits. IDs 3/6 remain configured but were not emitted. Base generated
+  tokens fall 3840→783, adapter 965→946. Treat this as runtime efficiency,
+  not a learned planning gain. Both models remain 0/4; destructive writes,
+  missing edits and false success claims remain recorded without admission.
+- The live CLI omitted final log chunks despite successful completion. Recover
+  complete logs from the same job; never substitute six records for eight or
+  spend on another inference job just to recover logs. Independent audit
+  recomputes metrics and hashes all eight records plus source/log provenance.
+- Save a validated opt-in native-stopping profile and runtime gate. Preserve
+  the inactive EXP-018 candidate and all frozen legacy configs/results as
+  historical artifacts. Future comparisons must explicitly version and use
+  the same stopping profile in both models. No global runtime switch here.
+- Stop before training. Next is bounded corrective-data training with the 15
+  admitted continuation targets and existing masking/weight checks. No new
+  owner review is required for this runtime gate; no held-out tasks accessed.
 
-## Phase B initial benchmark decisions
+## Pinned corrective label/stopping preflight completed (2026-11-14)
 
-- **Versioned, pinned repository snapshot:** benchmark tasks use the compact Python miniapp under `evals/benchmark/snapshots/miniapp`. Every record includes a content digest; loading rejects a changed snapshot. Each task starts from a separate workspace copy so one edit cannot affect another task or the source snapshot.
-- **Fixed stratified split:** version `terminal-slm-initial-v1` contains 50 tasks, five in each of ten categories. Four tasks per category (40 total) are train-support; one per category (10 total) is held-out evaluation. The permanent IDs are in `evals/benchmark/manifest.json`.
-- **Contamination rule:** held-out tasks and any future outcomes/trajectories derived from them must not be used to make SFT, DPO, or GRPO examples, preferences, demonstrations, or reward data. `training_task_ids()` exposes train-support IDs only. This is a data-handling policy as repository files themselves are not access controlled.
-- **Executable task contract:** task records include the instruction, expected outcome, validation command, and success conditions. The runner checks final-answer terms and required tool names as applicable, then executes validation in the isolated task workspace. Optional reference patches are omitted from this initial set.
-- **Initial support-split diagnostic run:** actual Qwen3-1.7B inference was run on ten train-support tasks across two batches. Two tasks passed; tool-call schemas were valid for emitted calls, while wrong tool/path choices, one validation failure, and a timeout caused the other failures. This is diagnostic evidence only, not a full baseline. JSONL trajectories and per-run summaries are stored under `evals/benchmark/results/train-support/`. No held-out tasks were run and no training examples were created.
-- **Scope limit:** the miniapp is useful for validating the initial executable format but does not establish broad real-repository coverage. Before baseline evaluation, review realism, overlap, difficulty, validator quality, and snapshot diversity; a replacement requires a new version and a newly frozen held-out set.
-- **B2 evaluation records:** each run selects exactly one split, checks selected IDs against it before model loading, and writes complete trajectories, validation output, outcomes, token counts when the local runtime provides exact counters, and summary metrics. The evaluator never creates SFT/DPO/GRPO examples. Temporary task workspaces are removed after records are written.
-- **Runtime constraint observed:** the evaluator session could not access the GTX 1060 and ran the local checkpoint on CPU. Cold loading took about 4.5 minutes and one task exceeded its 600-second execution budget because generation deadlines are cooperative. Use the WSL GPU-enabled runtime for practical larger baseline runs; retain the CPU traces as actual but limited diagnostic observations.
+- EXP-018 verifies all 15 admitted targets using the actual pinned TRL collator.
+  All prompt turns are masked, targets decode exactly, both native closing
+  tokens are supervised at weight 1, and no truncation occurs (max 2490/4096).
+  The three metadata-free full-read weight annotations now work using conservative
+  EOF evidence; old gold spans remain unchanged. No data text is rewritten.
+- Official pinned model/generation JSON use EOS 3, tokenizer turn EOS is 6,
+  and chat END_RESPONSE is 261001. Keep these distinctions explicit. Legacy
+  generation stops only at 6 and ignores the emitted response boundary.
+- In twelve matched generations, all six legacy controls reproduce and the
+  response-aware tokens match each legacy prefix through its first closing.
+  Base generated tokens fall 768→121, cap hits 3→0, decoded actions unchanged.
+  This fixes a generation-efficiency issue in the diagnostic, not task behavior.
+- Historical speed/token comparisons are affected by this stopping interaction;
+  do not attribute all their differences to learned planning. Preserve old runs
+  and validate a new consistent runtime on both models before new comparisons.
+- Save an inactive candidate preserving upstream EOS 3 plus closings 6/261001.
+  Only [261001,6] was directly tested here; the full union requires a versioned
+  live support replay. Frozen inference settings remain unchanged.
+- All 27 audit records recovered; no optimizer, gradients, training, local model
+  inference or held-out access. Next: versioned native-stop support comparison,
+  then bounded training on the audited corrective export. See EXP-018.
 
-## Phase A manual Qwen3 smoke gate
+## Corrective data admission completed (2026-11-14)
 
-- **Keep the first smoke tasks disposable and small:** the suite checks locating a function, finding an environment variable, reading a file, running one existing unit test, and making one marker-file change. Each task operates on a fresh temporary copy of the repository; this avoids allowing the trivial change task to modify the real checkout.
-- **Persist complete run evidence:** `evals/manual_smoke.py` writes one JSONL record per task with the full timestamped `AgentTrajectory`, raw model outputs when available, tool arguments/results, model/tool step counts, latency, stop reason, and task verifier outcome. This suite is an integration diagnostic, not the formal Phase B benchmark.
-- **Do not convert setup failures into model failures:** the 2026-10-10 smoke attempt ended on the first model turn for all five tasks. `torch`, `transformers`, and the Qwen3 cache/weights were absent; NVML/GPU access was blocked in this execution session. The recorded stop reason is `model_error`, with no tool calls. This diagnoses an unavailable model-inference environment. It gives no evidence about tool schemas, parser behavior, executor behavior, Qwen3 context formatting, or the model's task capability.
-- **Current result artifact:** `research/results/manual_smoke_20261010_environment_blocked.jsonl` contains the five actual setup-failure trajectories. No synthetic model output or benchmark score was generated.
-- **Gate remains open:** after a compatible runtime and locally available base weights are provided, rerun the same tasks, inspect each complete trace, and diagnose any failures by layer before claiming an end-to-end milestone or beginning Phase B.
-- **2026-10-16 owner run:** the default CLI path selected `Qwen/Qwen3-1.7B` and failed to load offline because weights were stored at `models/Qwen3-1.7B`; use an explicit `--model-path`. With the explicit path, 311 model weight shards loaded, but generation failed at `rendered.shape`: this Transformers version returned a `BatchEncoding`, not a tensor. `LocalTransformersClient` now uses `return_dict=True`, reads `input_ids.shape`, and passes the mapping as keyword arguments to `generate`. A unit regression test simulates that object without loading packages or weights. Rerun the smoke tasks with the explicit local path to verify real inference; no successful end-to-end task is claimed yet.
-- **2026-10-16 smoke follow-up:** the owner reran the suite and all five tasks completed with successful tool execution. The original output reported 3/5 because two verifiers were too strict: unittest wrote `OK` to stderr, and the requested marker was written without a trailing newline. The verifiers now account for both. The saved trajectories support 5/5 under corrected checks; a fresh run is recommended so the JSONL directly records that verifier revision.
+- Apply all six owner decisions without rewriting their reasons. Preserve the
+  original receipt, raw candidates and pending sidecar backup. Admission is a
+  separate step authorized by the user's subsequent request to proceed.
+- Admit only four task-completing references; both approved factual failure
+  reports remain permanently excluded. Revalidate all four transcripts against
+  frozen support snapshots and task contracts before exporting.
+- Export 15 unique continuation-only targets, zero exact duplicates or old-gold
+  overlaps. Do not merge old data or train archived assistant prefix turns.
+  Generic all-assistant extraction is inappropriate for these transcripts.
+- All four executions and 15 structural boundary checks pass; expected nonzero
+  B046 test exits remain valid evidence. No new model success, inference,
+  training, benchmark change or held-out access occurs. See EXP-017.
+- Token-level audit remains pending because local package versions differ from
+  the pinned cloud runtime. A cached tokenizer inspection also identifies the
+  previously unexplained token 261001 as END_RESPONSE; the runner stops only on
+  tokenizer EOS 6, END_OF_TURN. Check both closing tokens and official generation
+  settings in the next pinned preflight before allocating further training.
+  Do not silently change frozen evaluation settings or historical results.
 
-## Hackathon Phase 2 decisions (2026-11-04)
+## Corrective support batch prepared for owner review (2026-11-14)
 
-- **Pin model and software before baseline:** `configs/tiny_aya_eval.json` pins the Tiny Aya Hub revision, FP16, Python 3.12, PyTorch 2.11.0, Transformers 5.22.1, Accelerate 1.15.0, AgentTune 1.1.3, prompt, and tool-schema hashes. This avoids silently changing the before/after evaluation environment.
-- **Use the AgentTune Cohere path:** Tiny Aya uses AgentTune's Cohere fallback action format; the original Qwen native parser remains a separate historical route. AgentTune handles rollouts and tool orchestration, while Terminal-SLM's existing workspace tools and executable validators remain the authority for task state.
-- **Freeze rather than edit benchmark:** the benchmark version and all ten held-out IDs are asserted before inference. No benchmark task or split has been modified in Phase 2.
-- **Make held-out access explicit:** the cloud baseline bundle contains the held-out JSONL and a held-out-only manifest, but no support JSONL. Training rollout generation must use a separately prepared support-only bundle.
-- **Separate setup from results:** Phase 2 creates the evaluator and launch path only. No model inference, baseline result, training run, or synthetic data was generated. Phase 3 is gated on the user's launch after checking live GPU Job cost and HF model access.
-- **Metric definitions:** malformed model outputs count as invalid tool attempts. Tool-selection accuracy is aggregated across tasks with the benchmark's required-versus-unexpected distinct tool formula. Task success still requires response, required tool, validator, and completion checks.
+- EXP-016 branches from actual weighted replay prefixes on B021/B026/B041/B046.
+  Re-execute those prefix tools to reproduce state, preserving original messages
+  and hash-bound provenance. No new model inference, training or held-out access.
+- Three repair continuations observe complete source before full-file writes,
+  change only the requested behavior, and pass named plus upper-bound checks.
+  The explanation continuation uses the actual intentionally failing test and
+  source evidence without making changes or claiming the test passed.
+- Two additional truthful reports follow destructive writes/test failures.
+  They remain failed tasks and audit-only, with zero proposed training targets.
+  Correct factual reporting is not a positive repair result.
+- The first four candidates propose 15 actions. Archive prefix assistant turns
+  are context only and cannot become completions. Explicit continuation indices
+  and completion-only row inspection enforce that distinction.
+- All six records are pending human review and training-ineligible. Old approved
+  data, owner reviews and training launchers stay unchanged. Refuse overwriting
+  the review batch and bind decisions to exact source-record hashes. No approved
+  export or automatic training admission is produced.
+- These are six branches on four tasks, not six new independent tasks or evidence
+  of model improvement. Owner review, duplicate handling and a bounded training
+  gate remain before any new GPU experiment. See EXP-016 and the review packet.
+
+## Observation-format and metadata comparison completed (2026-11-14)
+
+- EXP-015 corrects the unverified serialization hypothesis: all twelve reviewed
+  observations already use the runtime's JSON header, indentation and escaping.
+  TinyAyaPolicy serializes the same payload byte-for-byte identically. Do not
+  invent a formatting bug or regenerate approved references just for whitespace.
+- The bounded-result adapter clears metadata on every tool result. Four reviewed
+  reads and three writes contain metadata; five shell results already have none.
+  Save the static audit and source hashes separately from inference results.
+- In matched full-source live histories, restore only truthful read metadata
+  (path and line_count). All twelve predictions are recovered and the three
+  runtime adapter outputs reproduce EXP-014 exactly. No gold answers are supplied.
+- Metadata leaves B021's malformed action and B026's repeated read unchanged.
+  B041 adds contradictory default assignments (15 then 10), turning its named
+  test pass into a failure. Both models have zero strict preserved/exact gold
+  writes. Preserve the regression; do not patch output or alter validators.
+- Metadata omission is real but is not a demonstrated fix for these failures.
+  Keep the production normalizer, frozen tasks and reviewed data unchanged.
+  Stop formatting-only probes; next consider reviewed corrective support
+  demonstrations in actual runtime histories before allocating more training.
+- No training, held-out access, new agent benchmark score or automatically approved
+  target is produced. Last full replay remains EXP-012's 0/4. See EXP-015.
+
+## Matched live-source observation intervention completed (2026-11-14)
+
+- EXP-014 supplies complete source in the actual archived failing histories,
+  changing only the last observation's stdout. Original conversations are exact;
+  prior read arguments stay unchanged, so augmented observations are explicitly
+  counterfactual. Both base and weighted adapter receive identical paired inputs.
+- All twelve predictions were recovered. The three original adapter outputs
+  reproduce EXP-012 exactly. B026's inputs and outputs remain identical across
+  conditions in both arms, validating its role as an identity control.
+- Complete source improves B041 from a broken snippet to a write whose named
+  timeout test passes, with both functions preserved. It still removes the
+  unused os import and module docstring: a scope defect, not an observed failure
+  of the named functional repair. Report both facts without erasing the gain.
+- B021's augmented output is malformed JSON and is never executed. B026 still
+  reads instead of writing. Full source alone is insufficient for reliable edits.
+  Do not weaken validation or automatically fix the model's JSON.
+- Keep conditional named-validator passes separate from strict file preservation
+  and complete agent success. No new agent task-success rate is claimed; the last
+  actual paired replay remains 0/4. No generated output becomes training data.
+- Before more training, consider a separately versioned observation-serialization
+  comparison under the same live histories. Full-source gold-history success
+  did not transfer exactly, and remaining context differences are not isolated.
+  No extra training, held-out access or benchmark edit occurred. See EXP-014.
+
+## Complete-source preservation diagnostic completed (2026-11-14)
+
+- EXP-013 reused the saved weighted adapter and exact EXP-011 source prefixes,
+  input IDs, labels, quantization and decoding. All 48 boundary/prediction records
+  were recovered; no optimizer, training or held-out access occurred.
+- With complete approved source, B041's entire action/file matches the gold edit
+  and its named test passes. B021 retains surrounding code and passes its named
+  lower-bound test, but incorrectly removes the upper cap. B026 still reads
+  instead of writing. Do not describe these as three complete repairs.
+- Run existing B021 upper-bound test as an explicitly post hoc diagnostic;
+  it fails 101 != 100. Preserve the frozen named validator and report both
+  outcomes. No task or benchmark file is changed after seeing this result.
+- Keep file preservation, semantic edit correctness and source gathering separate.
+  Live B021/B041 wrote after partial reads and deleted module contents; approved
+  full-source histories produce preserved files. Other history details differ,
+  so source length alone has not been isolated causally. B026 already had full
+  source in the live run and remains an action-choice problem.
+- Exact free action matches improve from EXP-011's 5/16 to 6/16, adding the B041
+  write to five shell commands. This is conditioned prediction evidence; the
+  last actual agent replay remains 0/4. No generated target is owner-approved.
+- Next consider a controlled source-observation intervention on support tasks,
+  uniformly across base/adapter under a separately versioned replay. Do not
+  launch more training or change the frozen benchmark based on this diagnostic.
+
+## Weighted completion objective completed (2026-11-14)
+
+- EXP-012 keeps the four approved references/16 targets, seed, 64 updates,
+  runtime and replay controls fixed. Tool names and changed-code tokens receive
+  weight 8, JSON closure weight 4, other completion tokens/EOS weight 1;
+  context remains masked. Use maximum overlap and summed-weight normalization.
+- Derive edit spans from the preceding approved full-file read and map exact
+  escaped JSON offsets to supervised tokens. Audit all 16 targets and reject
+  ambiguous/truncated labels. Synthetic unit weights reproduce ordinary CE
+  values and gradients; no model inference runs locally.
+- The first weighted job overflowed FP16 gradients and was cancelled. Preserve
+  its failed-attempt record/log. Initialize AMP at 8192 on rerun, recording the
+  original 65536 state and unchanged growth/backoff rules; fail immediately on
+  skipped updates. This numerical difference from EXP-010 is disclosed.
+- Corrected training completed all 64 updates/four epochs without skips.
+  The replay recovered all eight trajectories: both arms 0/4. Weighted calls
+  were 19/19 schema-valid, with three executed writes on B021/B041; all writes
+  replaced required module contents and failed validation. B026 falsely claimed
+  a fix without a write; B046 omitted the actual ignored-environment cause.
+- Treat this as narrow protocol/tool-choice progress, not a working repair
+  model. All four adapter episodes still needed repeat recovery. Preserve
+  model-origin final answers but admit none as training data. No held-out
+  access or evaluation changes occurred. See EXP-012 and its independent audit.
+- Before more training, inspect whether the weighted model can produce complete
+  preserved-file edits under approved full-file histories versus its live
+  partial reads. Do not automatically increase epochs or sweep weights.
+
+## Per-action label diagnostic completed (2026-11-14)
+
+- EXP-011 verified all 16 training prefixes, decoded completion labels and EOS
+  targets against generation prompts. All counts reproduced. The prepared-row
+  shuffle concern caused no source-ID mismatches in this run; do not report
+  it as a discovered audit bug.
+- With approved reference histories, the 64-step adapter reproduced 5/16
+  exact actions versus 1/16 for base. All five were test-running shell calls.
+  It selected write_file on 0/3 intended edit actions, preferring shell at the
+  first tool-name token even with 96.75–98.67% per-action token accuracy.
+- Preserve all 16 boundary and 32 prediction records. These conditioned
+  predictions are diagnostic evidence, not new task-success or training data.
+- Next hypothesis: emphasize critical tool-name, changed-code and JSON-closure decisions within
+  full completion supervision and track per-action matches. No extra training
+  or data expansion was launched as part of the diagnostic.
+
+## Fixed memorization diagnostic completed (2026-11-14)
+
+- EXP-010 used exactly 64 fresh-base QLoRA updates and four epochs on the same
+  four approved references/16 targets, with no skipped updates. Save all 64
+  training logs and the exact adapter upload commit. No extra data or held-out
+  tasks entered this experiment.
+- The paired replay remained 0/4 for base and adapter with zero edits. The
+  adapter reduced invalid calls (16.7% to 7.7%) and extra-action/prose violations
+  (6 to 0). Report that limited protocol effect without claiming task learning.
+- Preserve the raw token-length value of 2 as an instrumentation bug. Audit
+  mask counts yield a maximum actual batch length of 2345. Future preflight
+  counts input_ids, not BatchEncoding fields; regression coverage was added.
+- Stop after the fixed experiment. Diagnose per-action predictions and label
+  boundaries before another training escalation; aggregate loss and valid JSON
+  are insufficient to demonstrate terminal-task completion.
+
+## Paired support replay completed (2026-11-13)
+
+- EXP-009 compared base and the eight-step adapter under identical NF4
+  inference on B021/B026/B041/B046. Both scored 0/4, made no file changes,
+  and had 83.3% schema validity. The result is training-example replay, not
+  held-out performance. Preserve all eight raw trajectories and log provenance.
+- Check effective chat templates rather than serialization containers. The
+  initial job's preflight rejected equivalent dict/string representations; the
+  corrected retry compared selected text, vocabularies and special token IDs.
+- Keep support observations in JSON for both arms. The missing v5 formatting
+  branch was corrected before inference and did not alter the frozen baseline.
+- Eight optimizer steps covered only 0.5 epoch of 16 action targets. A future
+  fixed multi-epoch diagnostic should establish whether verified action
+  sequences can be learned before expanding data or running held-out models.
+  Do not label weight changes, lower loss, or an unverified finish as task success.
+
+## SFT pipeline milestone (2026-11-13)
+
+- HF run `20261113T220511Z` completed eight QLoRA steps on the four approved
+  references, with changed adapter weights and a successful reload. The dataset
+  hash matches the local 16-target export; no held-out tasks were accessed.
+- Preserve the raw result and source-log provenance under
+  `research/results/tiny-aya-sft-smoke/`. The generated support probe has an
+  invalid JSON escape and was not executed. Do not label this task success or
+  interpret aggregate training loss as improved agent performance.
+- Next diagnose behavior with a paired base/adapter replay on the approved
+  support tasks using the same NF4 inference settings. Treat it as training-set
+  reproduction and keep it distinct from the earlier FP16 held-out baseline.
+
+# Current decisions and status (2026-11-15)
+
+This record summarizes the active Terminal-SLM hackathon implementation and
+supersedes the earlier prototype-specific environment and model notes above.
+The active model path is Tiny Aya Global on Hugging Face GPU Jobs through
+AgentTune. Local model inference is not part of this submission.
+
+## Tool and workspace boundary
+
+- Keep the five tools (`shell`, `read_file`, `write_file`, `grep`, `git`)
+  workspace-scoped with bounded time/output, filtered environments, command
+  logs, path checks and explicit destructive-operation guards.
+- Use temporary task workspaces and independent validators. These controls are
+  application-level guardrails, not an operating-system sandbox.
+- Preserve complete trajectories, raw failures, timestamps and model/harness
+  attribution. Never turn a harness-authored termination message into a model
+  training target.
+
+## Model, training and evaluation boundary
+
+- Use `CohereLabs/tiny-aya-global` for the hackathon comparison. AgentTune is
+  the model/action and training integration; the local harness is not the
+  inference path for reported results.
+- Freeze a 50-task benchmark at 40 support and 10 held-out tasks. Held-out IDs,
+  outcomes, patches and rewards remain outside training and support selection.
+- Admit only reviewed support targets. Keep truthful-failure demonstrations
+  audit-only, and distinguish completed edits from factual-answer scoring.
+- Treat executable validators as the task-success authority and AuditKIT as a
+  recorded-episode structural audit. Neither training loss nor tool-choice
+  accuracy alone demonstrates task completion.
+- Keep support-only diagnostics separate from the frozen matched held-out
+  comparison, with the model/configuration and limitations stated for each.
+
+## Completed evidence and current interpretation
+
+- Tiny Aya baseline: 0/10 frozen held-out task contracts (EXP-004).
+- EXP-025 matched held-out comparison: base 1/10, selected adapter 2/10;
+  both 0/5 on code repair/update tasks. The adapter's extra contract pass had
+  an inaccurate explanation, so no reliable end-to-end gain is claimed.
+- EXP-027 later support-only diagnostic: task-start adapter 2/4 versus base
+  0/4 on four known support tasks. Two exact reviewed edits passed named and
+  regression tests; two tasks failed. This is not held-out evidence and did
+  not alter the EXP-025 candidate or metrics.
+- Training scripts verify source provenance, masks, gradients, updates, and
+  adapter reload. The saved training loss is not a task-success measurement.
+
+Old local-model prototype trajectories have been removed from the current
+working tree. Earlier commits retain repository history; this cleanup does not
+rewrite Git history. The active support data and Tiny Aya records preserve their
+own review, split and provenance boundaries.
+
+## Submission boundary
+
+No public model/data publication or live deployment is claimed. Before any
+public release, review Tiny Aya's base-model terms, confirm the project's own
+source/data licensing, publish only approved artifacts, and verify links. No
+additional training or inference is recommended before submission.

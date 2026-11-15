@@ -1,0 +1,36 @@
+{
+  "kind": "approved_target_coverage_audit",
+  "heldout_accessed": false,
+  "model_inference": false,
+  "new_training_admission": false,
+  "gold_rows": 16,
+  "corrective_rows": 15,
+  "gold_initial_actions": [
+    {
+      "task_id": "B021",
+      "example_id": "G-B021-v1",
+      "first_action": "read_file"
+    },
+    {
+      "task_id": "B026",
+      "example_id": "G-B026-v1",
+      "first_action": "shell"
+    },
+    {
+      "task_id": "B041",
+      "example_id": "G-B041-v1",
+      "first_action": "read_file"
+    },
+    {
+      "task_id": "B046",
+      "example_id": "G-B046-v1",
+      "first_action": "shell"
+    }
+  ],
+  "corrective_initial_actions": [],
+  "combined_unique_context_targets": 31,
+  "exact_duplicates": [],
+  "gold_rows_sha256": "ef2ef134f4b30dc822879e85d238e206c1c6ef9e949d83f49c60c21c75df33ae",
+  "corrective_rows_sha256": "03fc46a5cbfa41482ffbfda57ff8188bbfc761df998cc01a7f6e5bf0b803bb3b",
+  "interpretation": "Corrective-only training has zero initial task-start targets. Approved gold references supply four. This coverage fact is not evidence that mixing them improves agent outcomes."
+}

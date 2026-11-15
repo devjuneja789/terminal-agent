@@ -1,0 +1,22 @@
+{
+  "batch_kind": "corrective_support_review_candidates",
+  "candidate_count": 6,
+  "task_ids": [
+    "B021",
+    "B026",
+    "B041",
+    "B046"
+  ],
+  "independent_task_count": 4,
+  "training_candidate_count": 4,
+  "audit_only_failure_reports": 2,
+  "proposed_action_target_count": 15,
+  "training_eligible_count": 0,
+  "training_performed": false,
+  "model_inference_performed": false,
+  "heldout_accessed": false,
+  "records_sha256": "731fa3f172db1b84f6fbb9672fa8aed2664e45ebafceb0327148b860af6f4910",
+  "source_replay_sha256": "2173bc8925f9bd1a78db9bdb58bf281b4cbb33218bf24af409c8bc63faa4b3b7",
+  "review_required": true,
+  "archived_prefixes_are_not_targets": true
+}

@@ -1,0 +1,14 @@
+{
+  "source_log": "research/results/tiny-aya-corrective-contexts/20261114T224343Z.log",
+  "source_log_sha256": "fa294f45a79649056cc23fe048d2596a1fe88dafbe954ef48a3612ca8dc45d80",
+  "all_45_records_recovered": true,
+  "hf_job_id": "6af8e42629dd05ff0367e923",
+  "analysis_sha256": "bfab1387a416f6a8f94000ed074a57abde7fc0aca1d44ba9318871df6b69895b",
+  "job_inspection_sha256": "168c756da8aac6d5121ea7c706304c2c30901c1d113f24e9a44ef7eb9bed696b",
+  "source_sha256": {
+    "training/agenttune/corrective_contexts.py": "5226a378450ae9745a5599fbe37f6a04e42749a9b307303f0a4fe62f0881ee6e",
+    "training/agenttune/prepare_corrective_contexts.py": "6b924a73fc34054096c0d524c30b844e5f7b73e6b5a634767f0255ea2860cf3f",
+    "scripts/analyze_corrective_contexts.py": "301b6adea7bf8e9b822abee801753089598fa1627fd81a7eca101ae6a2176d46",
+    "scripts/extract_corrective_contexts.py": "72bb0aa9e8d42aa18e8dae078bec9f5cfd54dca497355e89a5e9e27a8f5cecb1"
+  }
+}

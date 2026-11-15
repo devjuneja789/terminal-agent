@@ -1,0 +1,15 @@
+{
+  "kind": "approved_support_sft_smoke",
+  "source_examples": [
+    "G-B021-v1",
+    "G-B026-v1",
+    "G-B041-v1",
+    "G-B046-v1"
+  ],
+  "trajectory_count": 4,
+  "action_target_count": 16,
+  "rows_sha256": "ef2ef134f4b30dc822879e85d238e206c1c6ef9e949d83f49c60c21c75df33ae",
+  "loss": "completion_only",
+  "heldout_accessed": false,
+  "purpose": "pipeline smoke only; four references cannot establish generalization"
+}

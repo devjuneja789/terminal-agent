@@ -1,0 +1,146 @@
+{
+  "observation_count": 12,
+  "canonical_pretty_count": 12,
+  "runtime_serializer_identical_count": 12,
+  "metadata_removed_count": 7,
+  "observations": [
+    {
+      "task_id": "B021",
+      "tool": "read_file",
+      "canonical_pretty_json": true,
+      "runtime_serializer_same_bytes_for_same_payload": true,
+      "metadata": {
+        "path": "shop/config.py",
+        "line_count": 18
+      },
+      "bounded_runtime_changes_only_metadata": true,
+      "metadata_removed_by_runtime": true
+    },
+    {
+      "task_id": "B021",
+      "tool": "write_file",
+      "canonical_pretty_json": true,
+      "runtime_serializer_same_bytes_for_same_payload": true,
+      "metadata": {
+        "path": "shop/config.py",
+        "characters_written": 420
+      },
+      "bounded_runtime_changes_only_metadata": true,
+      "metadata_removed_by_runtime": true
+    },
+    {
+      "task_id": "B021",
+      "tool": "shell",
+      "canonical_pretty_json": true,
+      "runtime_serializer_same_bytes_for_same_payload": true,
+      "metadata": {},
+      "bounded_runtime_changes_only_metadata": true,
+      "metadata_removed_by_runtime": false
+    },
+    {
+      "task_id": "B026",
+      "tool": "shell",
+      "canonical_pretty_json": true,
+      "runtime_serializer_same_bytes_for_same_payload": true,
+      "metadata": {},
+      "bounded_runtime_changes_only_metadata": true,
+      "metadata_removed_by_runtime": false
+    },
+    {
+      "task_id": "B026",
+      "tool": "read_file",
+      "canonical_pretty_json": true,
+      "runtime_serializer_same_bytes_for_same_payload": true,
+      "metadata": {
+        "path": "shop/config.py",
+        "line_count": 18
+      },
+      "bounded_runtime_changes_only_metadata": true,
+      "metadata_removed_by_runtime": true
+    },
+    {
+      "task_id": "B026",
+      "tool": "write_file",
+      "canonical_pretty_json": true,
+      "runtime_serializer_same_bytes_for_same_payload": true,
+      "metadata": {
+        "path": "shop/config.py",
+        "characters_written": 454
+      },
+      "bounded_runtime_changes_only_metadata": true,
+      "metadata_removed_by_runtime": true
+    },
+    {
+      "task_id": "B026",
+      "tool": "shell",
+      "canonical_pretty_json": true,
+      "runtime_serializer_same_bytes_for_same_payload": true,
+      "metadata": {},
+      "bounded_runtime_changes_only_metadata": true,
+      "metadata_removed_by_runtime": false
+    },
+    {
+      "task_id": "B041",
+      "tool": "read_file",
+      "canonical_pretty_json": true,
+      "runtime_serializer_same_bytes_for_same_payload": true,
+      "metadata": {
+        "path": "shop/config.py",
+        "line_count": 18
+      },
+      "bounded_runtime_changes_only_metadata": true,
+      "metadata_removed_by_runtime": true
+    },
+    {
+      "task_id": "B041",
+      "tool": "write_file",
+      "canonical_pretty_json": true,
+      "runtime_serializer_same_bytes_for_same_payload": true,
+      "metadata": {
+        "path": "shop/config.py",
+        "characters_written": 412
+      },
+      "bounded_runtime_changes_only_metadata": true,
+      "metadata_removed_by_runtime": true
+    },
+    {
+      "task_id": "B041",
+      "tool": "shell",
+      "canonical_pretty_json": true,
+      "runtime_serializer_same_bytes_for_same_payload": true,
+      "metadata": {},
+      "bounded_runtime_changes_only_metadata": true,
+      "metadata_removed_by_runtime": false
+    },
+    {
+      "task_id": "B046",
+      "tool": "shell",
+      "canonical_pretty_json": true,
+      "runtime_serializer_same_bytes_for_same_payload": true,
+      "metadata": {},
+      "bounded_runtime_changes_only_metadata": true,
+      "metadata_removed_by_runtime": false
+    },
+    {
+      "task_id": "B046",
+      "tool": "read_file",
+      "canonical_pretty_json": true,
+      "runtime_serializer_same_bytes_for_same_payload": true,
+      "metadata": {
+        "path": "shop/config.py",
+        "line_count": 18
+      },
+      "bounded_runtime_changes_only_metadata": true,
+      "metadata_removed_by_runtime": true
+    }
+  ],
+  "training_performed": false,
+  "heldout_accessed": false,
+  "rows_sha256": "ef2ef134f4b30dc822879e85d238e206c1c6ef9e949d83f49c60c21c75df33ae",
+  "source_files_sha256": {
+    "data/sft/gold_support.approved.jsonl": "0e3567cdd35a20a39954e9c5337b412ce9b6cb447090bd4a904241fcb878794a",
+    "training/agenttune/evaluate_heldout.py": "88d5da79e4aed5c8bace6c75b45bdcc032492a6f2bdfe065d1a4c1491cc0dd00",
+    "training/agenttune/hf_gpu_smoke.py": "bb0947936a2b994d5b2b7b4c72da1d3b7b990b2ddaefe0dafd9af7dc85e18ec9",
+    "training/agenttune/prepare_observation_metadata.py": "2e730aa640ce3a6dc3ff432f2a2655a7b8afefcd3edab0c2ad302090b79e49f5"
+  }
+}

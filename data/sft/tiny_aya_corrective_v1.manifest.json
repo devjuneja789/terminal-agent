@@ -1,0 +1,36 @@
+{
+  "kind": "owner_approved_corrective_sft_admission_v1",
+  "admitted_example_ids": [
+    "C-B021-read-complete-v1",
+    "C-B026-choose-write-v1",
+    "C-B041-preserve-file-v1",
+    "C-B046-explain-evidence-v1"
+  ],
+  "task_ids": [
+    "B021",
+    "B026",
+    "B041",
+    "B046"
+  ],
+  "admitted_count": 4,
+  "permanently_excluded_example_ids": [
+    "C-B021-truthful-failure-v1",
+    "C-B041-truthful-failure-v1"
+  ],
+  "action_target_count": 15,
+  "duplicate_count": 0,
+  "exact_overlap_with_old_gold": 0,
+  "old_gold_merged": false,
+  "rows_sha256": "03fc46a5cbfa41482ffbfda57ff8188bbfc761df998cc01a7f6e5bf0b803bb3b",
+  "source_candidates_sha256": "731fa3f172db1b84f6fbb9672fa8aed2664e45ebafceb0327148b860af6f4910",
+  "owner_receipt_sha256": "a8055f8bbd93ffd232e8bbd7a6df036e49495f7ee8b0338c491a1fe54feaa2cc",
+  "review_sidecar_before_sha256": "361ccea41ea1ac3396e2d59918b6c1730b6ea16877b373527f88625f45d5096a",
+  "review_sidecar_after_sha256": "befa6921a0ba2e781523247fc687cacbe3e1dcb736d66222fddceef13e78adbf",
+  "revalidated_count": 4,
+  "archived_prefixes_context_only": true,
+  "structural_boundary_check_count": 15,
+  "tokenizer_label_audit": "pending",
+  "training_performed": false,
+  "model_inference_performed": false,
+  "heldout_accessed": false
+}

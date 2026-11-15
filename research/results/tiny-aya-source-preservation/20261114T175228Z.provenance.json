@@ -1,0 +1,16 @@
+{
+  "source_log": "research/results/tiny-aya-source-preservation/20261114T175003Z.log",
+  "source_log_sha256": "02713c2bd4e857d8e887d0b2948a721026a6d9a8d11ca46e83e52f53dd7ac3a2",
+  "all_48_records_recovered": true,
+  "job_id": "6af89f5229dd05ff036796d4",
+  "config_sha256": "61abf773bfa08475a6c23ef3305bc64c8a9df1300ede349c80578fa26f55e894",
+  "source_training_run_id": "20261114T160511Z",
+  "adapter_commit": "1c0559e7eeab4aaea8fffeddf91ff741cfdb2fe0",
+  "source_files_sha256": {
+    "training/agenttune/action_diagnostic.py": "acdc3b167b66991f419b491103cedb87065a6ea8d4e789000d63eb94db4f4db0",
+    "training/agenttune/prepare_action_diagnostic.py": "7ff628e41bad8eaed98f68943da3b1be1fbe9348a1fac5362045fd77683d7c60",
+    "training/agenttune/source_preservation.py": "02410ad6d79b9198b33d8690ecb14f3a652464cdb266388ac45c3d661c819168",
+    "scripts/analyze_source_preservation.py": "727ea5e02ed791a050b7a495dcb1e044268e5f367a1f41fea9f36aa539870654",
+    "scripts/run_tiny_aya_source_preservation.sh": "fc7501b72723b8c2e2177da14a48110d5cf270fb6eb5cbdcbe9d4510aee9c9e5"
+  }
+}

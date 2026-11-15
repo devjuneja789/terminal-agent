@@ -8,6 +8,7 @@ touch any held-out task.
 from __future__ import annotations
 
 import importlib.metadata
+import ast
 import hashlib
 import json
 import os
@@ -25,7 +26,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-CONFIG_PATH = PROJECT_ROOT / "configs" / "tiny_aya_eval.json"
+CONFIG_PATH = Path(os.environ.get(
+    "TERMINAL_SLM_CONFIG",
+    str(PROJECT_ROOT / "configs" / "tiny_aya_eval.json"),
+)).resolve()
 EVAL_CONFIG = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
 MODEL_ID = EVAL_CONFIG["model"]["repo_id"]
 MODEL_REVISION = EVAL_CONFIG["model"]["revision"]
@@ -91,15 +95,17 @@ class TinyAyaPolicy:
         self.prompts: list[list[dict[str, str]]] = []
         self.parse_errors: list[str | None] = []
         self.selected_actions: list[dict[str, Any]] = []
+        self.returned_action_output_indices: list[int | None] = []
+        self.final_response_source: str | None = None
         self.prompt_tokens_seen = 0
         self.generated_tokens_seen = 0
         self.time_limit_seconds = time_limit_seconds
         self.started_at = time.monotonic()
 
-    def __call__(self, state: Any) -> dict[str, Any]:
+    def _generate_raw(self, messages: list[dict[str, str]]) -> str:
         if self.time_limit_seconds is not None and time.monotonic() - self.started_at >= self.time_limit_seconds:
             raise TimeoutError("per-task model-call time limit reached")
-        messages = self._messages(state)
+        messages = [dict(message) for message in messages]
         while True:
             inputs = self.tokenizer.apply_chat_template(
                 messages,
@@ -132,6 +138,12 @@ class TinyAyaPolicy:
             raise TimeoutError("model generation exceeded the per-task time limit")
         raw = self.tokenizer.decode(generated[0, prompt_length:], skip_special_tokens=True).strip()
         self.raw_outputs.append(raw)
+        return raw
+
+    def __call__(self, state: Any) -> dict[str, Any]:
+        messages = self._messages(state)
+        raw = self._generate_raw(messages)
+        output_index = len(self.raw_outputs) - 1
         try:
             action, trailing = self._parse_action(raw)
         except Exception as exc:
@@ -139,17 +151,144 @@ class TinyAyaPolicy:
             raise
         self.parse_errors.append(None)
         adaptation: str | None = None
-        # Tiny Aya sometimes emits one valid fallback action followed by its
-        # ordinary assistant answer instead of a `finish` action. After at
-        # least one observed tool step, treat a plain text tail as the final
-        # response. Never execute the later proposed action from that same
-        # completion. On the initial turn, keep the selected action so the
-        # requested tool still runs.
-        if getattr(state, "step", 0) > 0 and trailing and "[" not in trailing:
+        prompt_variant = EVAL_CONFIG.get("prompt_variant", "")
+        is_support_v2_or_later = prompt_variant in {
+            "support-v2-action-evidence", "support-v3-json-observations",
+            "support-v4-json-repeat-guard", "support-v5-repeat-finish-retry",
+        }
+        if is_support_v2_or_later:
+            if trailing and re.search(r"\[\s*\{", trailing):
+                adaptation = "additional_action_arrays_ignored_after_first"
+            elif trailing:
+                # Run the selected tool and ask again after the observation;
+                # prose must not replace a needed inspection/edit/test action.
+                adaptation = "trailing_text_ignored_after_selected_action"
+        elif getattr(state, "step", 0) > 0 and trailing and "[" not in trailing:
+            # Preserve the frozen baseline's original response adaptation.
             discarded_action = action["tool_name"]
             action = {"tool_name": "finish", "parameters": {"answer": trailing}}
             adaptation = f"plain_text_tail_to_finish; discarded_action={discarded_action}"
-        self.selected_actions.append(self._action_validity(action))
+        action_record = self._action_validity(action)
+        repeated_action_stopped = False
+        if prompt_variant == "support-v3-json-observations" and action["tool_name"] in {"grep", "read_file"} and action_record["schema_valid"]:
+            action_key = json.dumps(
+                {"name": action["tool_name"], "arguments": action["parameters"]},
+                sort_keys=True, ensure_ascii=False, separators=(",", ":"),
+            )
+            repeated_action_stopped = any(
+                previous.get("schema_valid")
+                and previous.get("name") in {"grep", "read_file"}
+                and json.dumps(
+                    {"name": previous.get("name"), "arguments": previous.get("arguments", {})},
+                    sort_keys=True, ensure_ascii=False, separators=(",", ":"),
+                ) == action_key
+                for previous in self.selected_actions
+            )
+        elif prompt_variant in {"support-v4-json-repeat-guard", "support-v5-repeat-finish-retry"} and action["tool_name"] != "finish" and action_record["schema_valid"]:
+            action_key = json.dumps(
+                {"name": action["tool_name"], "arguments": action["parameters"]},
+                sort_keys=True, ensure_ascii=False, separators=(",", ":"),
+            )
+            for index in range(len(self.selected_actions) - 1, -1, -1):
+                previous = self.selected_actions[index]
+                previous_key = json.dumps(
+                    {"name": previous.get("name"), "arguments": previous.get("arguments", {})},
+                    sort_keys=True, ensure_ascii=False, separators=(",", ":"),
+                )
+                if not previous.get("schema_valid") or previous_key != action_key:
+                    continue
+                edited_since = any(
+                    earlier.get("name") == "write_file" and earlier.get("schema_valid")
+                    for earlier in self.selected_actions[index + 1:]
+                )
+                repeated_action_stopped = not edited_since
+                break
+        if repeated_action_stopped:
+            action_record["blocked_by_loop_guard"] = True
+        self.selected_actions.append(action_record)
+        if repeated_action_stopped:
+            if prompt_variant == "support-v5-repeat-finish-retry":
+                self.ignored_trailing_text.append(trailing)
+                self.response_adaptations.append("repeated_action_finish_retry_triggered")
+                retry_messages = [dict(message) for message in self.prompts[output_index]]
+                retry_messages.extend([
+                    {"role": "assistant", "content": json.dumps([action], ensure_ascii=False)},
+                    {
+                        "role": "user",
+                        "content": (
+                            "Your proposed action repeats a tool call already made, so it was not run again. "
+                            "The earlier tool observation is available above. Tools are disabled for this recovery turn. "
+                            "Return exactly one JSON action using only tool_name=finish and parameters={\"answer\": "
+                            "\"your concise evidence-based answer\"}. If the observations do not support an answer, "
+                            "say what is unknown. Do not propose another tool call."
+                        ),
+                    },
+                ])
+                retry_raw = self._generate_raw(retry_messages)
+                retry_output_index = len(self.raw_outputs) - 1
+                try:
+                    retry_action, retry_trailing = self._parse_action(retry_raw)
+                except Exception as exc:
+                    self.parse_errors.append(f"{type(exc).__name__}: {exc}")
+                    retry_action = None
+                    retry_trailing = ""
+                else:
+                    self.parse_errors.append(None)
+
+                if retry_action is not None:
+                    retry_record = self._action_validity(retry_action)
+                    if (
+                        retry_action.get("tool_name") != "finish"
+                        or not retry_record["schema_valid"]
+                        or not str(retry_action["parameters"].get("answer", "")).strip()
+                    ):
+                        retry_record["schema_valid"] = False
+                        retry_record["error"] = "finish-only repeat recovery requires a non-empty finish answer"
+                        self.selected_actions.append(retry_record)
+                        retry_action = None
+
+                if retry_action is not None:
+                    self.selected_actions.append(retry_record)
+                    self.returned_action_output_indices.append(retry_output_index)
+                    self.assistant_turns.append(json.dumps([retry_action], ensure_ascii=False))
+                    self.ignored_trailing_text.append(retry_trailing)
+                    self.response_adaptations.append("repeated_action_finish_retry_succeeded")
+                    self.final_response_source = "model"
+                    return {"name": "finish", "arguments": retry_action["parameters"]}
+
+                self.returned_action_output_indices.append(None)
+                self.assistant_turns.append(json.dumps([
+                    {"tool_name": "finish", "parameters": {"answer": ""}}
+                ], ensure_ascii=False))
+                self.ignored_trailing_text.append(retry_trailing)
+                self.response_adaptations.append("repeated_action_finish_retry_failed")
+                self.final_response_source = "harness_empty_stop"
+                self.selected_actions.append({
+                    "name": "finish",
+                    "arguments": {"answer": ""},
+                    "schema_valid": True,
+                    "source": "harness",
+                })
+                return {"name": "finish", "arguments": {"answer": ""}}
+
+            action = {
+                "tool_name": "finish",
+                "parameters": {"answer": "I could not complete the task: I repeated the same read-only tool call without new evidence."},
+            }
+            adaptation = (
+                "repeated_read_action_stopped"
+                if prompt_variant == "support-v3-json-observations"
+                else "repeated_action_stopped_without_intervening_edit"
+            )
+            self.returned_action_output_indices.append(None)
+            self.final_response_source = "harness_empty_stop" if prompt_variant == "support-v5-repeat-finish-retry" else "harness"
+        elif trailing and is_support_v2_or_later:
+            # Run the selected tool and ask again after the observation;
+            # prose must not replace a needed inspection/edit/test action.
+            adaptation = adaptation or "trailing_text_ignored_after_selected_action"
+        self.returned_action_output_indices.append(output_index)
+        if action["tool_name"] == "finish":
+            self.final_response_source = "model"
         # Only echo the action actually handed to AgentTune. Tiny Aya sometimes
         # emits several proposed actions in one completion; replaying discarded
         # proposals alongside later tool observations corrupts the dialogue.
@@ -178,14 +317,30 @@ class TinyAyaPolicy:
             kind = str(getattr(event.kind, "value", event.kind)).lower()
             payload = event.payload if isinstance(event.payload, dict) else {}
             if "observation" in kind and payload.get("text"):
-                observations.append(str(payload["text"]))
+                value = str(payload["text"])
+                if EVAL_CONFIG.get("prompt_variant") in {"support-v3-json-observations", "support-v4-json-repeat-guard", "support-v5-repeat-finish-retry"}:
+                    value = self._format_observation(value)
+                observations.append(value)
         if observations:
             messages.append({"role": "user", "content": observations[0]})
             for index, observation in enumerate(observations[1:]):
                 if index < len(self.raw_outputs):
                     messages.append({"role": "assistant", "content": self.assistant_turns[index]})
-                messages.append({"role": "user", "content": "Tool result:\n" + observation})
+                content = observation if observation.startswith(("Tool result:\n", "Tool result (JSON):\n")) else "Tool result:\n" + observation
+                messages.append({"role": "user", "content": content})
         return messages
+
+    @staticmethod
+    def _format_observation(text: str) -> str:
+        prefix = "Tool result:\n"
+        raw_value = text[len(prefix):] if text.startswith(prefix) else text
+        try:
+            value = ast.literal_eval(raw_value)
+        except (SyntaxError, ValueError):
+            return text
+        if not isinstance(value, (dict, list)):
+            return text
+        return "Tool result (JSON):\n" + json.dumps(value, ensure_ascii=False, indent=2, default=str)
 
     def _action_validity(self, action: dict[str, Any]) -> dict[str, Any]:
         name = action["tool_name"]
@@ -421,6 +576,7 @@ def main() -> int:
                 "failure": failure,
                 "selected_tools": selected_tools,
                 "final_answer": final_answer,
+                "final_response_source": policy.final_response_source,
                 "plain_text_output": plain_text,
                 "response_condition_passed": response_ok,
                 "purpose_condition_passed": purpose_ok,
@@ -435,6 +591,7 @@ def main() -> int:
                 "model_prompts": policy.prompts,
                 "model_parse_errors": policy.parse_errors,
                 "selected_actions": policy.selected_actions,
+                "returned_action_output_indices": policy.returned_action_output_indices,
                 "prompt_tokens": policy.prompt_tokens_seen,
                 "generated_tokens": policy.generated_tokens_seen,
                 "ignored_trailing_model_text": policy.ignored_trailing_text,

@@ -1,0 +1,15 @@
+{
+  "kind": "failed_training_startup",
+  "hf_job_id": "6af9466623985fb9cd82f08b",
+  "failure": "FP16 AMP overflow; first optimizer update skipped; callback abort",
+  "attempted_step": 1,
+  "optimizer_updates_applied": 0,
+  "completed_training": false,
+  "trained_artifact_saved": false,
+  "evidence": "First-step skipped-update exception in raw log; adapter save is after all required updates.",
+  "log_sha256": "494b8cc4fb552d9524185de802a8dff6623eca58909c3ed0ec0e2d55b1f230ff",
+  "profile_file": "configs/tiny_aya_tool_choice_sft_v1.json",
+  "profile_sha256": "19fd3c7e179fb6971d7f740a59e21bda6d957995f6bc1c2588a447c5cdf79fa9",
+  "prepared_config_sha256": null,
+  "heldout_accessed": false
+}

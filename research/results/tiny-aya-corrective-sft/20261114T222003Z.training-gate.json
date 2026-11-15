@@ -1,0 +1,16 @@
+{
+  "run_id": "20261114T222003Z",
+  "source_result_sha256": "6d7e20e0cde5e8484e0d9d7c0f426ee658be2cdae24bdae71a65e4f527fbedcb",
+  "config_id": "terminal-slm-corrective-15x4-weighted-v1",
+  "rows_sha256": "03fc46a5cbfa41482ffbfda57ff8188bbfc761df998cc01a7f6e5bf0b803bb3b",
+  "updates": 60,
+  "epochs": 4.0,
+  "skipped_optimizer_steps": [],
+  "admitted_source_count": 4,
+  "action_target_count": 15,
+  "all_label_checks_passed": true,
+  "weighted_edit_targets": 3,
+  "adapter_reload_passed": true,
+  "artifact_commit": "3c151e4280bab3fe27c25a53992a3cc17fc785fc",
+  "heldout_accessed": false
+}

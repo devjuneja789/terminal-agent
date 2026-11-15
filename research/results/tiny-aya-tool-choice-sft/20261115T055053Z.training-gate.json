@@ -1,0 +1,17 @@
+{
+  "run_id": "20261115T055053Z",
+  "profile_id": "terminal-slm-tool-choice-only-60-v2-scale256",
+  "result_sha256": "9ef3ff89bc714ebb93f78062ba8f88239cdcd7c0827d07afa5d89bc9a1b6d602",
+  "global_step": 60,
+  "epochs": 4.0,
+  "skipped_optimizer_steps": [],
+  "verified_context_count": 15,
+  "only_tool_name_weights_positive": true,
+  "gradient_preflight_batches": 15,
+  "gradient_preflight_max_unscaled_norm": 14.587697982788086,
+  "amp_initial_scale": 256,
+  "adapter_changed": true,
+  "adapter_reload_passed": true,
+  "artifact_commit": "2bb02aafefcfcb5de5a4c79737c8cbb20dd6a0d9",
+  "heldout_accessed": false
+}

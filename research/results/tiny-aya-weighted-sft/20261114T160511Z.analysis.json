@@ -1,0 +1,39 @@
+{
+  "global_step": 64,
+  "epoch": 4.0,
+  "skipped_optimizer_steps": [],
+  "epoch_mean_weighted_loss": [
+    0.7616029791533947,
+    0.5153681593947113,
+    0.361465071560815,
+    0.31720768427476287
+  ],
+  "epoch_mean_unweighted_completion_loss": [
+    0.8374113468453288,
+    0.5868225214071572,
+    0.441649186424911,
+    0.3975445720134303
+  ],
+  "all_64_losses_and_gradient_norms_finite": true,
+  "all_16_span_annotations_match_unchanged_approved_text": true,
+  "all_16_eos_labels_weight_one": true,
+  "max_training_tokens": 2345,
+  "amp_scaler_initialization": {
+    "before": {
+      "scale": 65536.0,
+      "growth_factor": 2.0,
+      "backoff_factor": 0.5,
+      "growth_interval": 2000,
+      "_growth_tracker": 0
+    },
+    "after": {
+      "scale": 8192.0,
+      "growth_factor": 2.0,
+      "backoff_factor": 0.5,
+      "growth_interval": 2000,
+      "_growth_tracker": 0
+    }
+  },
+  "rows_sha256": "ef2ef134f4b30dc822879e85d238e206c1c6ef9e949d83f49c60c21c75df33ae",
+  "heldout_accessed": false
+}

@@ -1,0 +1,6 @@
+{
+  "source_log": "research/results/tiny-aya-fit300/20261115T064807Z.log",
+  "source_log_sha256": "7402d912616fb1fcf32f01eaf6d5f477bdd483319bf493404ce1ff3dd078b212",
+  "complete_training_chunks": true,
+  "artifact_commit": "1eed40612640c78d88d9fe0cac36e06b1148d1fd"
+}

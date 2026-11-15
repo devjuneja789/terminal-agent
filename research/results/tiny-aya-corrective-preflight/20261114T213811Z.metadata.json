@@ -1,0 +1,138 @@
+{
+  "run_id": "20261114T213811Z",
+  "config": {
+    "config_id": "terminal-slm-corrective-label-stop-preflight-v1",
+    "model_id": "CohereLabs/tiny-aya-global",
+    "model_revision": "af89d219b53ed9b13b8a4645f9c8028973510324",
+    "adapter_repo": "devjuneja789/terminal-slm-tiny-aya-weighted-64-v1",
+    "adapter_revision": "1c0559e7eeab4aaea8fffeddf91ff741cfdb2fe0",
+    "adapter_subfolder": "20261114T160511Z/adapter",
+    "runtime": {
+      "torch": "2.11.0",
+      "transformers": "5.22.1",
+      "agenttune": "1.1.3",
+      "trl": "1.7.1",
+      "peft": "0.21.3",
+      "datasets": "5.2.0",
+      "bitsandbytes": "0.50.2",
+      "accelerate": "1.15.0"
+    },
+    "seed": 42,
+    "max_length": 4096,
+    "max_new_tokens": 256,
+    "max_inference_seconds": 1200,
+    "arms": [
+      "base",
+      "adapter"
+    ],
+    "stop_policies": {
+      "legacy_turn_only": [
+        6
+      ],
+      "response_or_turn": [
+        261001,
+        6
+      ]
+    },
+    "rows_sha256": "03fc46a5cbfa41482ffbfda57ff8188bbfc761df998cc01a7f6e5bf0b803bb3b",
+    "cases_sha256": "9c82a22c3497fba07d58aa6640e796c862d712aff7849ffba1b50bf63f755689",
+    "label_count": 15,
+    "generation_count": 12,
+    "loss_weighting": {
+      "base": 1.0,
+      "tool_name": 8.0,
+      "changed_code": 8.0,
+      "json_closure": 4.0,
+      "overlap": "max",
+      "normalization": "sum_active_weights",
+      "changed_code_source": "preceding_full_read_file_observation"
+    },
+    "admission_rows_sha256": "03fc46a5cbfa41482ffbfda57ff8188bbfc761df998cc01a7f6e5bf0b803bb3b",
+    "training_performed": false,
+    "heldout_accessed": false,
+    "source_run_id": "20261114T182159Z"
+  },
+  "config_sha256": "036b0a86172b84843fe0ccb27f9bedfd8203a771ccde342f81faeabcea8696f4",
+  "record_ids": [
+    "label:C-B021-read-complete-v1:4",
+    "label:C-B021-read-complete-v1:6",
+    "label:C-B021-read-complete-v1:8",
+    "label:C-B021-read-complete-v1:10",
+    "label:C-B021-read-complete-v1:12",
+    "label:C-B026-choose-write-v1:6",
+    "label:C-B026-choose-write-v1:8",
+    "label:C-B026-choose-write-v1:10",
+    "label:C-B026-choose-write-v1:12",
+    "label:C-B041-preserve-file-v1:4",
+    "label:C-B041-preserve-file-v1:6",
+    "label:C-B041-preserve-file-v1:8",
+    "label:C-B041-preserve-file-v1:10",
+    "label:C-B041-preserve-file-v1:12",
+    "label:C-B046-explain-evidence-v1:6",
+    "generation:base:legacy_turn_only:B021",
+    "generation:base:legacy_turn_only:B026",
+    "generation:base:legacy_turn_only:B041",
+    "generation:base:response_or_turn:B021",
+    "generation:base:response_or_turn:B026",
+    "generation:base:response_or_turn:B041",
+    "generation:adapter:legacy_turn_only:B021",
+    "generation:adapter:legacy_turn_only:B026",
+    "generation:adapter:legacy_turn_only:B041",
+    "generation:adapter:response_or_turn:B021",
+    "generation:adapter:response_or_turn:B026",
+    "generation:adapter:response_or_turn:B041"
+  ],
+  "upstream_pinned_configs": {
+    "config.json": {
+      "eos_token_id": 3,
+      "bos_token_id": 2,
+      "pad_token_id": 0,
+      "file_sha256": "458a9265b6a96e5ad4bbe1857716bd69e434f062f8b32fae48f5f06197d26384"
+    },
+    "generation_config.json": {
+      "eos_token_id": 3,
+      "bos_token_id": 2,
+      "pad_token_id": 0,
+      "file_sha256": "0efa696e1ebc0484f8e16fcd1141dba1e897c4699ff971052e43ce5d6d4bf4d0"
+    },
+    "tokenizer_config.json": {
+      "eos_token": "<|END_OF_TURN_TOKEN|>",
+      "bos_token": "<BOS_TOKEN>",
+      "pad_token": "<PAD>",
+      "file_sha256": "fb56a3ef7659346aae196a2ab877355f1e7fd871c36843f709bb2e23c606d972"
+    }
+  },
+  "closing_ids": [
+    261001,
+    6
+  ],
+  "gpu": "Tesla T4",
+  "packages": {
+    "torch": "2.11.0",
+    "transformers": "5.22.1",
+    "agenttune": "1.1.3",
+    "trl": "1.7.1",
+    "peft": "0.21.3",
+    "datasets": "5.2.0",
+    "bitsandbytes": "0.50.2",
+    "accelerate": "1.15.0"
+  },
+  "quantization": {
+    "quant_method": "bitsandbytes",
+    "_load_in_8bit": false,
+    "_load_in_4bit": true,
+    "llm_int8_threshold": 6.0,
+    "llm_int8_skip_modules": null,
+    "llm_int8_enable_fp32_cpu_offload": false,
+    "llm_int8_has_fp16_weight": false,
+    "bnb_4bit_quant_type": "nf4",
+    "bnb_4bit_use_double_quant": true,
+    "bnb_4bit_compute_dtype": "float16",
+    "bnb_4bit_quant_storage": "uint8",
+    "load_in_4bit": true,
+    "load_in_8bit": false
+  },
+  "training_performed": false,
+  "heldout_accessed": false,
+  "tool_execution_performed": false
+}

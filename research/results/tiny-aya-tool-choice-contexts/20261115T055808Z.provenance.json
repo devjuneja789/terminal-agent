@@ -1,0 +1,58 @@
+{
+  "source_log": "research/results/tiny-aya-tool-choice-contexts/20261115T055637Z.log",
+  "source_log_sha256": "e6e20fb5be8553bb1c58921a9dae6bd1e3e2e53acd60887a347b7782462613d2",
+  "all_45_records_recovered": true,
+  "training_job_id": "6af947e823985fb9cd82f1c2",
+  "diagnostic_job_id": "6af9499b29dd05ff03684542",
+  "failed_startup_job_id": "6af9466623985fb9cd82f08b",
+  "analysis_sha256": "9bcef799d5c8d2743384d15e0fc70f10ad4ffd7ef8532c2b81a36015903a1a7a",
+  "isolation_sha256": "c5465288328c53336d7da50df6489023c6283eb8a3a234be85b9daa5b388ea3c",
+  "source_sha256": {
+    "training/agenttune/tool_choice_objective.py": "82e46406f17713edbef21f98b76d621fd40bf4398dbc8c2f93d2558364b1ce83",
+    "training/agenttune/sft_smoke.py": "377569715c1b6387ca304f1cc86dee0650c52b1d7bf32e42a222adbfff43ee1d",
+    "training/agenttune/weighted_loss.py": "aa4a73b1c103fbda14c5e786f195c2b7ba11570aaefecdf6eabee2be9bdab7e4",
+    "training/agenttune/prepare_tool_choice_training.py": "a16160442e7329411c6259afeb7db4211cef1cf1b46f906961bcf6557230ed01",
+    "training/agenttune/prepare_tool_choice_contexts.py": "75426afe611937af488ae4c589dad0a32564a2c6c1e3ab95f57c5a5d1a9372e2",
+    "scripts/analyze_tool_choice_isolation.py": "f3901ec86177ca58d7d6d2b28d18c42b25904fa99d3794aab087d952343bc7a0"
+  },
+  "job_inspection_sha256": "1b983e3f91e8723123b02b1fc05c50d2ab3b8efc2c671277bb10a42e96ab63fd",
+  "job_statuses": [
+    {
+      "name": "terminal-slm-tool-choice-60-v1",
+      "job_id": "6af9466623985fb9cd82f08b",
+      "status": {
+        "stage": "ERROR",
+        "message": "Job failed with exit code: 1. Reason: Error"
+      },
+      "durations": {
+        "scheduling_secs": 13,
+        "running_secs": 141,
+        "total_secs": 154
+      }
+    },
+    {
+      "name": "terminal-slm-tool-choice-60-v2-scale256",
+      "job_id": "6af947e823985fb9cd82f1c2",
+      "status": {
+        "stage": "COMPLETED"
+      },
+      "durations": {
+        "scheduling_secs": 4,
+        "running_secs": 391,
+        "total_secs": 395
+      }
+    },
+    {
+      "name": "terminal-slm-tool-choice-contexts-v1",
+      "job_id": "6af9499b29dd05ff03684542",
+      "status": {
+        "stage": "COMPLETED"
+      },
+      "durations": {
+        "scheduling_secs": 5,
+        "running_secs": 284,
+        "total_secs": 289
+      }
+    }
+  ]
+}

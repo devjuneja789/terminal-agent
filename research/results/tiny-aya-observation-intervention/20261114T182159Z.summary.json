@@ -1,0 +1,21 @@
+{
+  "run_id": "20261114T182159Z",
+  "record_ids": [
+    "base:B021:original",
+    "base:B021:full_source",
+    "base:B026:original",
+    "base:B026:full_source",
+    "base:B041:original",
+    "base:B041:full_source",
+    "adapter:B021:original",
+    "adapter:B021:full_source",
+    "adapter:B026:original",
+    "adapter:B026:full_source",
+    "adapter:B041:original",
+    "adapter:B041:full_source"
+  ],
+  "prediction_count": 12,
+  "training_performed": false,
+  "heldout_accessed": false,
+  "tool_execution_performed": false
+}

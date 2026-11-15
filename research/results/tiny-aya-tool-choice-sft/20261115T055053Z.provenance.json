@@ -1,0 +1,6 @@
+{
+  "source_log": "research/results/tiny-aya-tool-choice-sft/20261115T054922Z.log",
+  "source_log_sha256": "b3e9696114bef046608e47f9336c68933c39fd735113bad738d12e1b1edb1e29",
+  "complete_training_chunks": true,
+  "artifact_commit": "2bb02aafefcfcb5de5a4c79737c8cbb20dd6a0d9"
+}

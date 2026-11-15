@@ -1,0 +1,42 @@
+{
+  "source_log": "research/results/tiny-aya-joint-contexts/20261115T062714Z.log",
+  "source_log_sha256": "11414843f751f2ac1fefea06b6ebf246c351ca54c45b5d38befb14a380877495",
+  "all_45_records_recovered": true,
+  "training_job_id": "6af94f0d23985fb9cd82f91d",
+  "diagnostic_job_id": "6af950c929dd05ff03684d11",
+  "job_statuses": [
+    {
+      "job_id": "6af94f0d23985fb9cd82f91d",
+      "status": {
+        "stage": "COMPLETED"
+      },
+      "durations": {
+        "scheduling_secs": 13,
+        "running_secs": 399,
+        "total_secs": 412
+      }
+    },
+    {
+      "job_id": "6af950c929dd05ff03684d11",
+      "status": {
+        "stage": "COMPLETED"
+      },
+      "durations": {
+        "scheduling_secs": 95,
+        "running_secs": 284,
+        "total_secs": 379
+      }
+    }
+  ],
+  "analysis_sha256": "db71fd40ea71c9b66eef1a7785c54ad31576409b6d4132cb2f0356861a80e364",
+  "comparison_sha256": "b9a3ede38c48abe0c5f847546380c57d68d87b7319d1a6c433b4955ae5a40d4b",
+  "adapter_hash_evidence_sha256": "7e56a3c0305615de19fb00129f4a6da4bfd937c8b345e8dd6b4e98a4212544ff",
+  "job_inspection_sha256": "b2c916b84601ca8f01fcabe3ef5dd1f6fb3b5ed242cc3bfae47d40349825e381",
+  "source_sha256": {
+    "training/agenttune/sft_smoke.py": "10a1d821c4fed00a99ffc746fda4ac01f51239760cd153651660f180491320a8",
+    "training/agenttune/joint_choice_objective.py": "6ebfa37225d63119199075af125b686dc675a4f9f5311c3aa4d6c5a94313949c",
+    "training/agenttune/prepare_joint_training.py": "529950dd589a31571a52bb808387581de7e5639b52a826946bbaa67c16b289b9",
+    "training/agenttune/prepare_joint_contexts.py": "029225af4759cdf43385ffff8be714cca96e035eec336aa3f461e1b461cee23b",
+    "scripts/analyze_corrective_contexts.py": "848dbca3e359042ec0951cde218ff97607c0092d6733aaf1d140397683b6b29b"
+  }
+}

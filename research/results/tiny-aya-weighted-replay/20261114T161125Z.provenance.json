@@ -1,0 +1,15 @@
+{
+  "job_id": "6af887c823985fb9cd824409",
+  "training_job_id": "6af8865329dd05ff0367796e",
+  "source_training_run_id": "20261114T160511Z",
+  "log": "research/results/tiny-aya-weighted-replay/20261114T160938Z.log",
+  "log_sha256": "7406ba99e4c8839c17e05ea61c98a776e5e425fe3b811e135d64b858be6492b7",
+  "records_sha256": "78efd207018b6669e77cf0bd82d7ec7621e7ed831ccb3248bd7446ac3927a367",
+  "config_sha256": "dee750d9ebb9cd507af57711a4ab830f0f4f1b7d20eeccbef67f35ffef37579f",
+  "record_count": 8,
+  "source_files_sha256": {
+    "training/agenttune/prepare_replay_bundle.py": "4aab8f06a1469ea2f937f37a5b40eb6f435a5489d294659f8bb6a722b20a76a5",
+    "training/agenttune/paired_replay.py": "b2fa3c5c3f0cb73b452ba7a875c839e5e0857726c5cdb8404920f32408bc2f7c",
+    "training/agenttune/run_replay_job.sh": "36c1c649636e695ba7fc3db2ca499fb7913aa03cd11fa1800ae8f3b415577aa6"
+  }
+}

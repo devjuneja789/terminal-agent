@@ -1,0 +1,18 @@
+{
+  "training_job_id": "6af8de3d23985fb9cd829fdc",
+  "replay_job_id": "6af8dfc523985fb9cd82a0e8",
+  "replay_log_sha256": "a6654349b1e849231fba09e36fda4b6ef4e0e52f5820a655c44ea6d91b94a1a6",
+  "analysis_sha256": "e543710a22080d2f0be5e34741ddf723e3487e9dbe3d5a268887777862079f34",
+  "source_sha256": {
+    "training/agenttune/sft_smoke.py": "6d05411f6c7a6ce4e0d41dda92c329cf3b7409b9a246b959e953eebd62b93219",
+    "training/agenttune/corrective_training_data.py": "a3caee6864ad39d495d07b50772bf2598deebb17bcf362cf802686617e9caa65",
+    "training/agenttune/prepare_corrective_training.py": "30e2622c800bce93fafbb5b65784136308cc8ac956a2e2b7fc3ffb506a410ab3",
+    "training/agenttune/prepare_corrective_replay.py": "13d223b1666b956895180e54ef58f3da3244c14db333637b03b6fa1a2f2faaff",
+    "scripts/analyze_corrective_training.py": "63d582522607e3bd95bb8d84142ad33aa9db040b37d4e2d9200a09a5d8e73b86",
+    "configs/tiny_aya_corrective_sft.json": "871e530b56c28b8f349e79e6da042d015af8d9dcb262e4afd8b29102ed23b4ad"
+  },
+  "complete_replay_records": 8,
+  "training_targets_added_from_replay": 0,
+  "heldout_accessed": false,
+  "job_inspection_sha256": "358f349a0b984e01e69f1282022f4a7d6d6afb35a82de303f4f1ecb5e21a0faf"
+}

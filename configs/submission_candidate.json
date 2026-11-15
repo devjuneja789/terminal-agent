@@ -1,0 +1,51 @@
+{
+  "freeze_id": "terminal-slm-submission-candidate-v1",
+  "frozen_at_utc": "2026-11-15T07:14:40.667391+00:00",
+  "selection_split": "train-support",
+  "selection_rule": [
+    "exact_full_action_matches",
+    "valid_finish_choices",
+    "schema_valid_outputs",
+    "valid_tool_choices"
+  ],
+  "tie_break": "retain joint60",
+  "candidates": [
+    {
+      "training_result": "/mnt/e/terminal-agent/research/results/tiny-aya-joint-sft/20261115T062137Z.result.json",
+      "context_prefix": "/mnt/e/terminal-agent/research/results/tiny-aya-joint-contexts/20261115T063016Z",
+      "score": [
+        3,
+        0,
+        14,
+        8
+      ]
+    },
+    {
+      "training_result": "research/results/tiny-aya-fit300/20261115T064937Z.result.json",
+      "context_prefix": "research/results/tiny-aya-fit300-contexts/20261115T071048Z",
+      "score": [
+        6,
+        4,
+        15,
+        15
+      ]
+    }
+  ],
+  "failure_reason": null,
+  "selected_training_result": "research/results/tiny-aya-fit300/20261115T064937Z.result.json",
+  "selected_training_result_sha256": "1672461b09ba7e0bd3b15e6c60451bd64830d1ec61fc46d2ffa45755c2969ca2",
+  "selected_score": [
+    6,
+    4,
+    15,
+    15
+  ],
+  "model_id": "CohereLabs/tiny-aya-global",
+  "model_revision": "af89d219b53ed9b13b8a4645f9c8028973510324",
+  "adapter_repo": "devjuneja789/terminal-slm-tiny-aya-joint-300-v1",
+  "adapter_revision": "1eed40612640c78d88d9fe0cac36e06b1148d1fd",
+  "adapter_subfolder": "20261115T064937Z/adapter",
+  "rows_sha256": "03fc46a5cbfa41482ffbfda57ff8188bbfc761df998cc01a7f6e5bf0b803bb3b",
+  "heldout_used_for_selection": false,
+  "further_training_planned": false
+}

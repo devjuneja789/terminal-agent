@@ -1,0 +1,12 @@
+{
+  "auditkit_version": "1.1.12",
+  "auditkit_commit": "9d4e21bac240e8108a22c2c137d179d6070868d5",
+  "source_records": "research/results/tiny-aya-final-heldout/20261115T071710Z.jsonl",
+  "source_sha256": "7b5f92f9e63f45e7abd87b65ea441aa0d4ac1cbddd209246fe01da5c67920955",
+  "bridge_source_sha256": "7405a34a99d65beea1a3e088e7730eed28d869cea00456f36616d61db49ff55d",
+  "episodes": 20,
+  "mode": "recorded",
+  "local_model_inference": false,
+  "tool_execution": false,
+  "external_judge": false
+}

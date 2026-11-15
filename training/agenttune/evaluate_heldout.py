@@ -123,7 +123,60 @@ def _bounded_result(value: dict[str, Any], limit: int) -> dict[str, Any]:
     return output
 
 
-def _run_one(task: Any, tokenizer: Any, model: Any, torch: Any, schemas: list[dict[str, Any]], *, run_id: str, metadata: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+def _workspace_file_hashes(root: Path) -> dict[str, str]:
+    """Hash task files while ignoring agent audit logs and Python caches."""
+    import hashlib
+
+    hashes: dict[str, str] = {}
+    ignored_parts = {".terminal-slm", "__pycache__", ".git"}
+    for path in sorted(root.rglob("*")):
+        relative = path.relative_to(root)
+        if any(part in ignored_parts for part in relative.parts) or path.suffix == ".pyc":
+            continue
+        if path.is_symlink():
+            hashes[relative.as_posix()] = "symlink:" + os.readlink(path)
+        elif path.is_file():
+            hashes[relative.as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashes
+
+
+def _run_initial_validation(task: Any, workspace: Path) -> dict[str, Any]:
+    env = {
+        "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
+        "LANG": "C.UTF-8",
+        "LC_ALL": "C.UTF-8",
+        "HOME": str(workspace),
+        "TMPDIR": str(workspace / ".tmp"),
+    }
+    Path(env["TMPDIR"]).mkdir(exist_ok=True)
+    try:
+        completed = subprocess.run(
+            task.validation_command,
+            cwd=workspace,
+            env=env,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=EVAL_CONFIG["agent"]["validation_timeout_seconds"],
+            check=False,
+        )
+        return {
+            "exit_code": completed.returncode,
+            "timed_out": False,
+            "stdout": completed.stdout,
+            "stderr": completed.stderr,
+        }
+    except subprocess.TimeoutExpired as exc:
+        return {
+            "exit_code": 124,
+            "timed_out": True,
+            "stdout": exc.stdout.decode("utf-8", errors="replace") if isinstance(exc.stdout, bytes) else exc.stdout or "",
+            "stderr": exc.stderr.decode("utf-8", errors="replace") if isinstance(exc.stderr, bytes) else exc.stderr or "",
+        }
+
+
+def _run_one(task: Any, tokenizer: Any, model: Any, torch: Any, schemas: list[dict[str, Any]], *, run_id: str, metadata: dict[str, Any], capture_support_audit: bool = False) -> tuple[dict[str, Any], dict[str, Any]]:
     agent_started = time.monotonic()
     policy: TinyAyaPolicy | None = None
     episode: dict[str, Any] = {"agenttune_events": [], "tool_executions": [], "exception": None}
@@ -131,6 +184,9 @@ def _run_one(task: Any, tokenizer: Any, model: Any, torch: Any, schemas: list[di
     def invoke(instruction: str, workspace: Path) -> AgentResult:
         from agenttune.agentic import DictToolHarness, Project, ReActStrategy
 
+        if capture_support_audit:
+            episode["initial_validation"] = _run_initial_validation(task, workspace)
+            episode["workspace_hashes_before"] = _workspace_file_hashes(workspace)
         toolbox = Toolbox(workspace)
         policy = TinyAyaPolicy(
             tokenizer,
@@ -198,10 +254,27 @@ def _run_one(task: Any, tokenizer: Any, model: Any, torch: Any, schemas: list[di
         finally:
             episode["agent_elapsed_seconds"] = time.monotonic() - episode["agent_started_monotonic"]
             toolbox.close()
+            if capture_support_audit:
+                before = episode["workspace_hashes_before"]
+                after = _workspace_file_hashes(workspace)
+                episode["changed_files"] = sorted(
+                    path for path in set(before) | set(after) if before.get(path) != after.get(path)
+                )
 
         native_events: list[TrajectoryEvent] = []
         final_response = ""
-        action_index = 0
+        action_event_index = 0
+        next_raw_output_index = 0
+
+        def append_model_output(raw_index: int) -> None:
+            native_events.append(TrajectoryEvent(
+                kind="model",
+                started_at=AgentTrajectory.timestamp(),
+                finished_at=AgentTrajectory.timestamp(),
+                model_output=policy.raw_outputs[raw_index],
+                error=policy.parse_errors[raw_index] if raw_index < len(policy.parse_errors) else None,
+            ))
+
         for index, event in enumerate(events):
             kind = str(event["kind"]).lower()
             if "tool_call" not in kind:
@@ -210,14 +283,24 @@ def _run_one(task: Any, tokenizer: Any, model: Any, torch: Any, schemas: list[di
             action = payload.get("action", {})
             name = action.get("name")
             arguments = action.get("arguments", {})
-            model_output = policy.raw_outputs[action_index] if action_index < len(policy.raw_outputs) else ""
-            native_events.append(TrajectoryEvent(
-                kind="model",
-                started_at=AgentTrajectory.timestamp(),
-                finished_at=AgentTrajectory.timestamp(),
-                model_output=model_output,
-            ))
-            action_index += 1
+            if action_event_index < len(policy.returned_action_output_indices):
+                raw_output_index = policy.returned_action_output_indices[action_event_index]
+            else:
+                raw_output_index = action_event_index if action_event_index < len(policy.raw_outputs) else None
+            action_event_index += 1
+            if raw_output_index is None:
+                # A final empty stop is harness control flow, not a model
+                # completion. Preserve any actual retry outputs before it.
+                while next_raw_output_index < len(policy.raw_outputs):
+                    append_model_output(next_raw_output_index)
+                    next_raw_output_index += 1
+            else:
+                while next_raw_output_index < raw_output_index:
+                    append_model_output(next_raw_output_index)
+                    next_raw_output_index += 1
+                if raw_output_index < len(policy.raw_outputs):
+                    append_model_output(raw_output_index)
+                    next_raw_output_index = raw_output_index + 1
             result_event = events[index + 1] if index + 1 < len(events) and "tool_result" in str(events[index + 1]["kind"]).lower() else None
             result_value = (
                 result_event.get("payload", {}).get("output")
@@ -247,15 +330,9 @@ def _run_one(task: Any, tokenizer: Any, model: Any, torch: Any, schemas: list[di
 
         # If inference failed before Project returned an EventLog, retain the
         # actual model outputs and parse failures rather than emitting an empty trace.
-        while action_index < len(policy.raw_outputs):
-            native_events.append(TrajectoryEvent(
-                kind="model",
-                started_at=AgentTrajectory.timestamp(),
-                finished_at=AgentTrajectory.timestamp(),
-                model_output=policy.raw_outputs[action_index],
-                error=policy.parse_errors[action_index],
-            ))
-            action_index += 1
+        while next_raw_output_index < len(policy.raw_outputs):
+            append_model_output(next_raw_output_index)
+            next_raw_output_index += 1
         completed = bool(final_response) and episode["exception"] is None
         if completed:
             stop_reason = StopReason.COMPLETED
@@ -316,6 +393,16 @@ def _run_one(task: Any, tokenizer: Any, model: Any, torch: Any, schemas: list[di
     success = run.passed
     if episode["exception"]:
         failure_category = "invalid_tool_call" if policy and any(policy.parse_errors) else "agent_runtime_error"
+    elif not success and policy and any(policy.parse_errors):
+        failure_category = "invalid_tool_call"
+    elif not success and any(
+        adaptation in {
+            "repeated_action_stopped_without_intervening_edit",
+            "repeated_action_finish_retry_failed",
+        }
+        for adaptation in response_adaptations
+    ):
+        failure_category = "agent_loop_guard"
     elif not success and any(not action["schema_valid"] for action in tool_actions):
         failure_category = "invalid_tool_call"
     elif not success and run.validation_timed_out:
@@ -351,7 +438,9 @@ def _run_one(task: Any, tokenizer: Any, model: Any, torch: Any, schemas: list[di
         "agent_stop_reason": run.agent_stop_reason,
         "agent_error": episode["exception"] or run.agent_error,
         "final_response": run.final_response,
+        "final_response_source": policy.final_response_source if policy else None,
         "success_condition": task.success_condition,
+        "task_file_changes": list(run.changed_files),
         "validation": {
             "command": list(task.validation_command),
             "exit_code": run.validation_exit_code,
@@ -385,12 +474,21 @@ def _run_one(task: Any, tokenizer: Any, model: Any, torch: Any, schemas: list[di
             "model_prompts": model_prompts,
             "parse_errors": parse_errors,
             "selected_actions": selected_actions,
+            "returned_action_output_indices": policy.returned_action_output_indices if policy else [],
             "ignored_trailing_model_text": policy.ignored_trailing_text if policy else [],
             "response_adaptations": response_adaptations,
             "tool_executions": tool_executions,
         },
         "experiment_metadata": metadata,
     }
+    if capture_support_audit:
+        record["support_audit"] = {
+            "initial_validation": episode.get("initial_validation"),
+            "changed_files": episode.get("changed_files", []),
+            "automated_reward": None,
+            "reward_status": "pending_scoring",
+            "human_review": {"status": "pending", "training_eligible": False},
+        }
     return record, {"validation_seconds": run.validation_seconds}
 
 
@@ -488,7 +586,7 @@ def _format_summary(summary: dict[str, Any], records: list[dict[str, Any]], meta
     return "\n".join(lines) + "\n"
 
 
-def _emit_task_record(record: dict[str, Any]) -> None:
+def _emit_task_record(record: dict[str, Any], *, marker: str = "BASELINE_TASK_RESULT_CHUNK") -> None:
     """Emit lossless, bounded log lines to survive HF console line limits."""
     encoded = base64.b64encode(
         json.dumps(record, ensure_ascii=False, separators=(",", ":"), default=str).encode("utf-8")
@@ -504,7 +602,7 @@ def _emit_task_record(record: dict[str, Any]) -> None:
             "parts": len(chunks),
             "data": data,
         }
-        print("BASELINE_TASK_RESULT_CHUNK=" + json.dumps(payload, separators=(",", ":")), flush=True)
+        print(marker + "=" + json.dumps(payload, separators=(",", ":")), flush=True)
 
 
 def main() -> int:

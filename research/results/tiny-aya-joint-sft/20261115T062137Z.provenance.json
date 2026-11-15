@@ -1,0 +1,6 @@
+{
+  "source_log": "research/results/tiny-aya-joint-sft/20261115T061950Z.log",
+  "source_log_sha256": "f5c5a1f9db78e0ff37ccfba8b90c0bdfd57664c29d7eddbe16f8a30e4c6e7a18",
+  "complete_training_chunks": true,
+  "artifact_commit": "36f7fecf593e523ca18b910d635465533a9a0e41"
+}

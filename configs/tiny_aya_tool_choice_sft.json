@@ -1,0 +1,43 @@
+{
+  "config_id": "terminal-slm-tool-choice-only-60-v2-scale256",
+  "experiment_kind": "support_tool_choice_isolation",
+  "model_id": "CohereLabs/tiny-aya-global",
+  "model_revision": "af89d219b53ed9b13b8a4645f9c8028973510324",
+  "agenttune_commit": "d4db4c12d52342227c4113a70183d0f64aa2f345",
+  "max_steps": 60,
+  "expected_epochs": 4,
+  "max_length": 4096,
+  "learning_rate": 0.0001,
+  "lr_scheduler_type": "linear",
+  "warmup_steps": 0,
+  "max_grad_norm": 1.0,
+  "lora_rank": 8,
+  "seed": 42,
+  "amp_initial_scale": 256,
+  "extra_runtime": {
+    "peft": "0.21.3",
+    "datasets": "5.2.0",
+    "bitsandbytes": "0.50.2",
+    "trl": "1.7.1"
+  },
+  "loss_weighting": {
+    "base": 1.0,
+    "tool_name": 8.0,
+    "changed_code": 8.0,
+    "json_closure": 4.0,
+    "overlap": "max",
+    "normalization": "sum_active_weights",
+    "changed_code_source": "preceding_full_read_file_observation"
+  },
+  "artifact_repo": null,
+  "dataset_kind": "admitted_corrective_continuations_v1",
+  "rows_sha256": "03fc46a5cbfa41482ffbfda57ff8188bbfc761df998cc01a7f6e5bf0b803bb3b",
+  "eos_token_ids": [
+    3,
+    6,
+    261001
+  ],
+  "runtime_stop_gate_run_id": "20261114T220329Z",
+  "objective": "tool_choice_only",
+  "gradient_preflight_all_batches": true
+}
