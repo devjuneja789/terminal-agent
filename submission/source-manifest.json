@@ -1390,8 +1390,8 @@
       "bytes": 3137
     },
     "submission/HF-PUBLISH-STEPS.md": {
-      "sha256": "84ec3023cd0e6d90a63175f2db8069841d51e275e365ff73d59d7c4cb7543da1",
-      "bytes": 3720
+      "bytes": 4824,
+      "sha256": "8133a4cdf2d49ced33893de535d579a3274086a6b8ed75879c341ffe8dd167f5"
     },
     "submission/release-manifest.json": {
       "sha256": "cf26606da6113921bf62d4e0563799dae063bd27fecf45520ffeffe82a17eda7",
@@ -1808,6 +1808,10 @@
     "training/agenttune/__init__.py": {
       "sha256": "c29a3d3e1de7febc5f3f3c9b348d29a06812bc498af1e69850d52e84f0a4dc55",
       "bytes": 66
+    },
+    "scripts/prepare_hf_evidence_viewer.py": {
+      "bytes": 6375,
+      "sha256": "6c4ee8ba29d9a25e2812fd47c44a425e9456bfaaf256022f830867d309d5ddf7"
     }
   }
 }

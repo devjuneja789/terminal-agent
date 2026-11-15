@@ -98,3 +98,25 @@ ask the hackathon organizers what alternative article URL they accept.
 The final form needs four real URLs: model collection, dataset collection,
 published article, and GitHub repository. Do not submit placeholders or links to
 private repositories.
+
+## Repair the evaluation dataset viewer
+
+The repository mixes tasks, training history and nested model traces. The
+viewer must use explicit configurations instead of automatically combining
+all JSON/JSONL files. Rebuild the viewer copies and corrected card locally:
+
+```sh
+python3 scripts/prepare_hf_evidence_viewer.py
+hf upload devjuneja789/terminal-slm-evaluation-evidence \
+  submission/hf-upload/evaluation-logs . --type dataset
+```
+
+This uploads the corrected root README, nine display JSONL files in `viewer/`,
+and `viewer-manifest.json`, alongside unchanged evidence. Each config has an
+explicit string schema, with JSON-encoded display cells for variable nested
+structures. Original evidence files are preserved. After the Hub rebuilds the
+viewer, select `final-heldout-runs` (20 rows) and the other configurations from
+the dropdown; `task-start-training-history` should show 621 rows. The old
+inferred default config is replaced by the named configs. If any new build
+fails, capture its configuration name and error text for diagnosis; do not
+change benchmark outcomes or suppress failed runs.
