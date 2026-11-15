@@ -2,8 +2,8 @@
   "status": "prepared_for_review_not_published",
   "files": {
     ".gitignore": {
-      "sha256": "e2448713d4dc841451a8ac1d557c0e2010eff08c3d19d3700be3f59543656ec4",
-      "bytes": 2048
+      "sha256": "01423cd76f3cd5fe2efe48170a355d2745a4ca6bb2cc0d516cc8f176dc6257b1",
+      "bytes": 2070
     },
     "cli.py": {
       "sha256": "1c4ee49c2183fce42b67012c753b0aeb8a6522e8ea82f9f0a4e74231878dc573",
@@ -1398,8 +1398,8 @@
       "bytes": 2983
     },
     "submission/HF-PUBLISH-STEPS.md": {
-      "sha256": "5917a4dc98e2ad15275eb34da39a7aa8497887aab1c2840a5b4e7cfb78e1140f",
-      "bytes": 3768
+      "sha256": "84ec3023cd0e6d90a63175f2db8069841d51e275e365ff73d59d7c4cb7543da1",
+      "bytes": 3720
     },
     "submission/release-manifest.json": {
       "sha256": "cf26606da6113921bf62d4e0563799dae063bd27fecf45520ffeffe82a17eda7",

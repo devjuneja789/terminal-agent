@@ -62,3 +62,4 @@ submission/release/
 research/results/manual_smoke_*.jsonl
 evals/benchmark/results/held-out-eval/run_20261016*
 evals/benchmark/results/train-support/run_202610*
+submission/hf-upload/

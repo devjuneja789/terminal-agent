@@ -3,7 +3,7 @@
 The focused, checksummed upload payload is staged at:
 
 ```text
-/tmp/terminal-slm-hf-focused
+submission/hf-upload
 ```
 
 It contains two adapter cards, approved support data, the frozen held-out and
@@ -20,7 +20,7 @@ cd /mnt/e/terminal-agent
 python3 - <<'PY'
 import json
 from pathlib import Path
-p=Path('/tmp/terminal-slm-hf-focused/release-manifest.json')
+p=Path('submission/hf-upload/release-manifest.json')
 m=json.loads(p.read_text())
 print(m['status'], len(m['files']), 'files')
 PY
@@ -38,11 +38,11 @@ corresponding model card from the focused payload:
 
 ```sh
 .venv/bin/hf upload devjuneja789/terminal-slm-tiny-aya-joint-300-v1 \
-  /tmp/terminal-slm-hf-focused/models/README-terminal-slm-tiny-aya-joint-300-v1.md \
+  submission/hf-upload/models/README-terminal-slm-tiny-aya-joint-300-v1.md \
   README.md --type model
 
 .venv/bin/hf upload devjuneja789/terminal-slm-tiny-aya-task-start-620-v1 \
-  /tmp/terminal-slm-hf-focused/models/README-terminal-slm-tiny-aya-task-start-620-v1.md \
+  submission/hf-upload/models/README-terminal-slm-tiny-aya-task-start-620-v1.md \
   README.md --type model
 ```
 
@@ -62,10 +62,10 @@ Then upload the staged folders:
 
 ```sh
 .venv/bin/hf upload devjuneja789/terminal-slm-reviewed-support \
-  /tmp/terminal-slm-hf-focused/support-data . --type dataset
+  submission/hf-upload/support-data . --type dataset
 
 .venv/bin/hf upload devjuneja789/terminal-slm-evaluation-evidence \
-  /tmp/terminal-slm-hf-focused/evaluation-logs . --type dataset
+  submission/hf-upload/evaluation-logs . --type dataset
 ```
 
 The support repository's license metadata is CC-BY-NC-4.0. Its training files
